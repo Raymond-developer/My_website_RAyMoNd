@@ -25,21 +25,7 @@ app.use(express.json())
 
  let User = '';
 
-  app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'register.html'));
- })
-
-   app.get('/get', (req, res) => {
-    res.json({
-      id: 'kjhgfhjksjhgjskjdhv',
-      name: 'fav',
-      email: 'jdhfgvhkfjh'
-    }, {
-      id: 'asiudyfgvcbxncbvsakjdfh',
-      name: 'moyi',
-      email: 'khfghdsgfd'
-    })
-   })
+ 
 
  app.post('/api/change', async (req, res) => {
   //console.log(req.body)
