@@ -20,7 +20,6 @@ mongoose.connect(MONGO_URL)
 
 app.use(cors())
 app.use(express.json())
-app.use(express.static(path.join(__dirname, 'frontend')))
 
   let token = '';
 
