@@ -21,12 +21,18 @@ mongoose.connect(MONGO_URL)
 app.use(cors())
 app.use(express.json())
 
+app.use(express.static(path.join(__dirname, 'register.html')))  // delete this
+
   let token = '';
 
  let User = '';
 
  app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'register.html'));
+  res.json({
+    id: 'lkjhgfhdjskkdjfhksjdh',
+    name: 'fave',
+    email: 'limax4688@gmail.com'
+  })
  })
 
 
@@ -63,7 +69,7 @@ app.use(express.json())
  })
   
 
- app.post('/api/login', async (req, res) => {
+ app.post('/login', async (req, res) => {
   console.log(req.body)
   const {name, email, password} = req.body
 
@@ -92,8 +98,8 @@ app.use(express.json())
 }) 
 
  
-app.post('/api/register', async (req, res) => {
-  
+app.post('/register', async (req, res) => {
+   //console.log(req.body)
    const {name, email, passwords} = req.body
 
     if(!name || typeof name !== 'string') {
@@ -103,7 +109,7 @@ app.post('/api/register', async (req, res) => {
        return res.send({status: 'error', error: 'Invalid email'})
     }
 
-     if(!passwords){
+     if(!passwords) {
        return res.send({status: 'error', error: 'Invalid password'})
      } 
      if(passwords.length <= 4) {
@@ -141,4 +147,6 @@ app.post('/create', (req, res) => {
 
 
 
-module.exports = app;
+app.listen(port, () => {
+  console.log(`app is running on port ${port} `)  
+}) 
