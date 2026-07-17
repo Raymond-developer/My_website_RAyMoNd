@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+   
+  <script>
+  const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+   </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <style>
+    .body {
+     font-family: Roboto;
+    }
+    .form-div{
+      
+      border: 3px solid rgb(185, 180, 180);
+      width: 530px;
+      height: 320px;
+      margin-left: 620px;
+      margin-top: 80px;
+      border-radius: 5px;
+      background-color: rgb(223, 216, 216);
+    }
+    
+    .login {
+      font-family: Roboto;
+      font-size: 30px;
+      margin-left: 70px;
+      margin-bottom: 30px;
+      font-weight: 700;
+      margin-top: 20px;
+    }
+
+    .username{
+      display: block;
+      width: 400px;
+      font-family: Roboto;
+      font-size: 20px;
+      margin-left: 70px;
+      font-weight: 700;
+      margin-top: 15px;
+      height: 40px;
+      border-radius: 5px;
+      padding-left: 15px
+       
+    }
+
+   .email{
+      display: block;
+      width: 400px;
+      font-family: Roboto;
+      font-size: 20px;
+      margin-left: 70px;
+      font-weight: 700;
+      margin-top: 15px;
+      height: 40px;
+      border-radius: 5px;
+      padding-left: 15px
+       
+    }
+
+    .password{
+      display: block;
+      width: 400px;
+      font-family: Roboto;
+      font-size: 20px;
+      margin-left: 70px;
+      font-weight: 700;
+      margin-top: 15px;
+      height: 40px;
+      border-radius: 5px;
+      padding-left: 15px
+       
+    }
+
+    .space{
+     font-family: Roboto;
+      font-size: 20px;
+      margin-left: 70px;
+      font-weight: 600;
+      margin-bottom: 30px;
+      margin-top: 5px;
+      
+    }
+
+    .button {
+       font-family: Roboto;
+      font-size: 23px;
+      margin-left: 70px;
+      font-weight: 500;
+      height: 50px;
+      width: 130px;
+      background-color: blue;
+      color: white;
+      margin-bottom: px;
+      border-radius: 5px;
+    
+    }
+
+    button:hover{
+      background-color: green;
+    }
+
+    .paragh {
+      font-family: Roboto;
+      font-size: 23px;
+      margin-left: 70px;
+      font-weight: 600;
+    }
+    .notice{
+      font-family: Roboto;
+      font-size: 25px;
+      margin-left: 70px;
+      font-weight: 600;  
+    }
+  </style>
+</head>
+<body>
+ 
+  <div class="form-div">
+
+   <div class="login"> Changing password </div>
+    
+    <form class="form">
+   <input class="password"  type="password" name="password">
+   <div class="space">Password</div>
+
+   <button class="button" type="submit" name="submit"> Change </button>
+
+    </form>
+  </div>
+ 
+
+  <script>
+     const form = document.querySelector('.form')
+
+    form.addEventListener('submit', registerUser)
+
+   async function registerUser(event) {
+    event.preventDefault()
+     const newPassword = document.querySelector('.password').value
+    
+     const result = await fetch('http://localhost:8000/api/change', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+         newPassword,
+         token: localStorage.getItem('token')
+      })
+    })
+
+    const data = await result.json()
+    if(data.status === 'ok') {
+     // localStorage.setItem('token', data.data)
+       alert('Password change')
+    } else {
+      alert(data.error)
+    }
+   }
+  </script>
+</body>
+</html>
