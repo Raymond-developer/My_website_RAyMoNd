@@ -93,7 +93,7 @@ app.use(express.json())
 
  
 app.post('/api/register', async (req, res) => {
-   //console.log(req.body)
+  
    const {name, email, passwords} = req.body
 
     if(!name || typeof name !== 'string') {
@@ -103,7 +103,7 @@ app.post('/api/register', async (req, res) => {
        return res.send({status: 'error', error: 'Invalid email'})
     }
 
-     if(!passwords) {
+     if(!passwords){
        return res.send({status: 'error', error: 'Invalid password'})
      } 
      if(passwords.length <= 4) {
