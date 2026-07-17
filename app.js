@@ -75,7 +75,7 @@ app.use(express.static(path.join(__dirname, 'frontend')))
  })
   
 
- app.post('/login', async (req, res) => {
+ app.post('/api/login', async (req, res) => {
   console.log(req.body)
   const {name, email, password} = req.body
 
@@ -104,7 +104,7 @@ app.use(express.static(path.join(__dirname, 'frontend')))
 }) 
 
  
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
    //console.log(req.body)
    const {name, email, passwords} = req.body
 
