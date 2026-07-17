@@ -25,9 +25,10 @@ app.use(express.json())
 
  let User = '';
 
-  app.get('/', (req, res) => {
+ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'register.html'));
- }) 
+ })
+
 
  app.post('/api/change', async (req, res) => {
   //console.log(req.body)
@@ -138,6 +139,6 @@ app.post('/create', (req, res) => {
   res.json({status: 'ok', data: select, input: input})
 })
 
-app.listen(port, () => {
-  console.log(`app is running on port ${port} `)  
-}) 
+
+
+module.exports = app;
