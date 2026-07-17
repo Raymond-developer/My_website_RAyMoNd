@@ -25,8 +25,10 @@ app.use(express.json())
 
  let User = '';
 
+ app.use(express.static(path.join(__dirname, 'register.html')))  // delete this
+
   app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'register.html'));
+  res.sendFile(path.join(__dirname, 'register.html'));
  }) 
 
  app.post('/api/change', async (req, res) => {
