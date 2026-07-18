@@ -152,7 +152,13 @@ app.get('/get', (req, res) => {
   res.json({status: 'ok', data: 'Selection', input: 'input'})
 })
 
+  
+app.post('/create', (req, res) => {
+  console.log(req.body)
+  const {select} = req.body
 
+  res.json({status: 'ok', data: select, input: 'input'})
+})
 
   app.listen(port, 
     console.log('server is running on port 8000')
