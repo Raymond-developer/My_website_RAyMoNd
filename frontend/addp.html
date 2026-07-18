@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <script>
+    // This runs before the page shows
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Product </title>
+ 
+   <style>
+      
+      body{
+         background-color: gray;
+      }
+
+      .containerr{
+       display: grid;
+       grid-template-columns: 1fr 1fr 1fr 1fr;
+      }
+
+      .container{
+            
+        width: 300px;
+        background-color: rgb(182, 163, 163);
+        padding: 10px;
+        padding-left: 70px;
+        border-radius: 10px;
+        margin-top: 30px;
+
+      }
+
+      .name{
+         font-size: 25px;
+         font-weight: 700;
+      }
+
+      .lastname{
+         font-size: 28px;
+         font-weight: 700;
+         margin-left: 70px;
+      }
+
+      .btn{
+         font-size: 25px;
+         font-weight: 700;
+         width: 150px;
+         padding: 10px;
+         margin-left: 50px;
+         border-radius: 10px;
+         margin-top: 10px;
+         
+      }
+
+      .input{
+         padding: 8px;
+         font-size: 25px;
+         font-weight: 700;
+         width: 220px;
+         margin-left: 0px;
+         border-radius: 10px;
+         margin-top: -3px;
+      }
+
+      .one, .two, .three{
+         padding: 5px;
+         padding-left: 10px;
+         font-size: 22px;
+         font-weight: 700;
+         width: 220px;
+         margin-left: 0px;
+         border-radius: 10px;
+      }
+
+      .img{
+       width: 220px;
+       height: 200px;
+      }
+   </style>
+
+</head>
+<body>
+   
+   <div class="containerr">
+  
+   </div>
+
+   <script type="module" src="product.js">
+
+   </script>
+</body>
+</html>
+

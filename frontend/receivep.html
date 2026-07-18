@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <script>
+    // This runs before the page shows
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Receive </title>
+     
+   <style>
+
+     
+      body{
+         background-color: rgb(150, 129, 129);
+      }
+
+
+    .containerr{
+       display: grid;
+       grid-template-columns: 1fr 1fr 1fr;
+       margin-left: 10px;
+       margin-top: 50px;
+       margin-right: -70px;
+       box-sizing: border-box;
+      }
+
+      .container{
+        width: 660px;
+        display: flex;
+        background-color: rgb(219, 216, 199);
+        padding: 0px 10px 10px 10px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        height: 250px;
+      }
+
+      .name{
+         font-size: 26px;
+         font-weight: 700;
+         margin-top: 20px;
+      }
+
+      .firstname{
+         font-size: 30px;
+         font-weight: 700;
+         margin-bottom: px;
+      }
+
+     .up{
+         font-size: 25px;
+         font-weight: 700;
+         margin: 10px;
+         margin-top: px;
+         margin-bottom: -15px;
+      }
+
+      .h3{
+         font-size: 28px;
+         font-weight: 700;
+         margin-bottom: px;
+      }
+
+      .delete, .edit{
+         font-size: 25px;
+         font-weight: 700;
+         width: 110px;
+         padding: 5px;
+         margin-left: px;
+         border-radius: 10px;
+         margin-bottom: -20px;
+      }
+
+      .input{
+         padding: 10px;
+         font-size: 22px;
+         font-weight: 600;
+         width: 150px;
+         margin-left: 0px;
+         border-radius: 10px;
+         margin-top: px;
+         
+
+      }
+
+      .img{
+       margin-top: 22px;
+       margin-left: 5px;
+       width: 150px;
+       height: 140px;
+       border-radius: 110px;
+      }
+
+    .dis1{
+       margin-right: 20px;
+    } 
+    
+    .dis2{
+      margin-top: 50px;
+      margin-right: px;
+     width: 260px;
+    }
+
+    .dis3{
+      margin-top: 40px;
+      width: 233px;
+      margin-left: 10px;
+      overflow: hidden;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .hh2{
+      font-size: 28px;
+      font-weight: 700;
+      margin-left: 25px;
+    }
+   </style>
+
+</head>
+<body>
+
+  
+  <div class="containerr">
+     <!--  <div class="container">
+         <div class="dis1">
+             <img class="img" src="${product.name}">
+          <h1> RAyMoNd </h1>
+         </div>
+       
+         <div class="dis2">
+       <h2 class="name"> last Active: ${product.username} </h2>
+       <h2 class="name"> email: ${product.email} </h2>
+       <button class="delete" data-id="${product.id}"> delete </button>
+      <span> <button class="edit" data-id="${product.id}"> Update </span> </button>
+      </div>
+
+      <div class="dis2">
+      <h2 class="up> Update input </h2> 
+      <h2 class="h3"> ${product.wel} </h2> 
+      <input type="text" class="input" data-id="${product.id} value="${product.wel}" placeholder="Update idea" required>
+      </div>
+     
+      </div> -->
+      </div>
+      
+  <script type="module" src="receive.js">
+
+
+  </script>
+</body>
+</html>

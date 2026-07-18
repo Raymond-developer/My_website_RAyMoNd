@@ -7,32 +7,38 @@ const cors = require('cors')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const path = require('path');
+const bordyparser = require('body-parser')
 const dotenv = require('dotenv').config()
+
 
 const port = process.env.PORT || 8000
 const JWT_SECRET = process.env.JWT_SECRET
-const MONGO_URL = process.env.MONGO_URL
+const url = process.env.MONGO_URL
 
+ async function main() {
+  try{
+      await mongoose.connect(url)
+      console.log("atlas connected successfully")
 
-mongoose.connect(MONGO_URL)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+  }catch(err){
+    console.log('err')
+     console.log(err)
+  }
+} 
+main()
 
 app.use(cors())
 app.use(express.json())
+app.use(bordyparser())
 
-app.use(express.static(path.join(__dirname, 'register.html')))  // delete this
+app.use(express.static(path.join(__dirname, 'frontend')))
 
   let token = '';
 
  let User = '';
 
- app.get('/', (req, res) => {
-  res.json({
-    id: 'lkjhgfhdjskkdjfhksjdh',
-    name: 'fave',
-    email: 'limax4688@gmail.com'
-  })
+  app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'register.html'));
  })
 
 
@@ -70,7 +76,7 @@ app.use(express.static(path.join(__dirname, 'register.html')))  // delete this
   
 
  app.post('/login', async (req, res) => {
-  console.log(req.body)
+  //console.log(req.body)
   const {name, email, password} = req.body
 
      User = await user.findOne({email}).lean()
