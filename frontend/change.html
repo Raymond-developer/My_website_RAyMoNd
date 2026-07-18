@@ -149,7 +149,7 @@
     event.preventDefault()
      const newPassword = document.querySelector('.password').value
     
-     const result = await fetch('http://localhost:8000/api/change', {
+     const result = await fetch('https://my-project-beta-liard.vercel.app/change', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

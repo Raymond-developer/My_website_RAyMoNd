@@ -89,7 +89,7 @@
      // const input = document.querySelectorAll('.input').value
 
 
-     const response = await fetch('http://localhost:8000/create', {
+     const response = await fetch('https://my-project-beta-liard.vercel.app/create', {
       method: 'POST',
       headers: {
          'Content-Type': 'application/json'
