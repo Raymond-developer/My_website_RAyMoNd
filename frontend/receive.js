@@ -1,6 +1,6 @@
    
   
-    export let orderArray = JSON.parse(localStorage.getItem('orders'))  || []
+    export const orderArray = JSON.parse(localStorage.getItem('orders'))  || []
    
     export function savetostorage() {
       localStorage.setItem('orders', JSON.stringify(orderArray))

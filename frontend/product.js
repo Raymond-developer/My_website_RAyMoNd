@@ -1,5 +1,4 @@
     import {orderArray, savetostorage} from './receive.js'
-      //'amazon-images/round-sunglasses-black (1).jpg'
      const product = [{
       id: 'ufddfghjkfjkdfbrertyuutreertyui',
       name: 'photo_2026-07-04_21-16-27.jpg',
@@ -86,8 +85,6 @@
       const dataset = btn.target.dataset.bot
       const select = product.find(p => p.id === dataset)
 
-     // const input = document.querySelectorAll('.input').value
-
 
      const response = await fetch('https://my-project-beta-liard.vercel.app/create', {
       method: 'POST',
@@ -95,7 +92,7 @@
          'Content-Type': 'application/json'
       }, 
       body: JSON.stringify({
-         select,
+         select
       })
      })
      
