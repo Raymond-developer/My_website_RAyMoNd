@@ -31,14 +31,14 @@ app.use(cors())
 app.use(express.json())
 app.use(bordyparser())
 
-app.use(express.static(path.join(__dirname, 'frontend')))
+app.use(express.static(path.join(__dirname, '../frontend')))
 
   let token = '';
 
  let User = '';
 
   app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'register.html'));
+  res.sendFile(path.join(__dirname, '../frontend', 'register.html'));
  })
 
 
