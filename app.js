@@ -42,6 +42,7 @@ app.use(express.static(path.join(__dirname, 'frontend')))
  })
 
 
+
  app.post('/api/change', async (req, res) => {
   //console.log(req.body)
    const { token, newPassword } = req.body
@@ -144,15 +145,12 @@ app.post('/register', async (req, res) => {
    res.json({status:'ok'})
 })
 
+  
 
-app.post('/create', (req, res) => {
-   const {select, input} = req.body
+app.get('/get', (req, res) => {
 
-  res.json({status: 'ok', data: select, input: input})
+  res.json({status: 'ok', data: 'Selection', input: 'input'})
 })
 
 
-
-app.listen(port, () => {
-  console.log(`app is running on port ${port} `)  
-}) 
+  module.export = app
