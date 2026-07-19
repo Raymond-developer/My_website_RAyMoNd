@@ -5,57 +5,153 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register</title>
   <style>
-    body{
-      background-image: url("photo_2026-07-04_21-32-33.jpg");
-    }
 
-    .container{
-       display: grid;
-      justify-content: center;
-      align-items: center;
-      height: 370px;
-      margin-top: 50px;
-    }
+    /* === MOBILE: 320px+ === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    .p{
+body {
+  background-image: url("photo_2026-07-04_21-32-33.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100%;
+  font-family: Arial, sans-serif;
+  padding: 20px 4%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+html, body {
+  height: 100%;
+}
+
+h1 {
+  font-weight: 700;
+  font-size: 28px;
+  margin: 0 0 20px 0;
+  text-align: center;
+  color: #fff;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  width: 100%;
+}
+
+.container {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background: rgba(255,255,255,0.9);
+  padding: 25px 5%;
+  border-radius: 10px;
+  margin-top: 0;
+}
+
+.p {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  color: #333;
+}
+
+.name, .email, .password {
+  font-size: 16px;
+  padding: 12px 4%;
+  font-weight: 600;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.name:focus, .email:focus, .password:focus {
+  outline: none;
+  border-color: green;
+}
+
+button {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  background-color: green;
+  color: white;
+  padding: 14px 5%;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+}
+
+button:active {
+  background-color: #006400;
+}
+
+.span {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  color: #333;
+}
+
+.link {
+  font-size: 16px;
+  font-weight: 700;
+  color: blue;
+  text-decoration: none;
+}
+
+/* === TABLET: 600px+ === */
+@media (min-width: 600px) {
+  body {
+    padding: 30px 5%;
+  }
+
+  h1 {
     font-size: 35px;
-    font-weight: 700;
-    }
+    margin-bottom: 30px;
+  }
 
-    .name, .email, .password{
-      font-size: 25px;
-      padding: 12px;
-      font-weight: 600;
-      border: none;
-      border-radius: 5px;
-    }
+  .container {
+    padding: 35px 6%;
+    gap: 18px;
+    max-width: 450px;
+  }
 
-    .link{
-      font-size: 35px;
-    font-weight: 700;
-    color: blue;
-    }
+  .p {
+    font-size: 21px;
+  }
 
-    .span{
-      margin-top: 28px;
-    font-size: 30px;
-    font-weight: 700;
-    }
+  .name, .email, .password {
+    font-size: 18px;
+    padding: 14px 4%;
+  }
 
-    button{
-       margin-top: 25px;
-    font-size: 30px;
-    font-weight: 700;
-    background-color: green;
-    padding: 10px;
-    border-radius: 10px;
-    }
+  button {
+    font-size: 20px;
+    padding: 16px 5%;
+  }
 
-    h1{
-      margin-left: 130px;
-      font-weight: 700;
-    }
-  </style>
+  .span, .link {
+    font-size: 18px;
+  }
+}
+
+/* === DESKTOP: 1024px+ === */
+@media (min-width: 1024px) {
+  body {
+    justify-content: center;
+  }
+
+  h1 {
+    font-size: 40px;
+  }
+}
+     </style>
 </head>
 <body>
   
@@ -88,7 +184,7 @@
          const button = document.querySelector('button')
 
          button.addEventListener('click', async () => {
-
+         
         const response = await fetch('https://my-project-three-psi-85.vercel.app/register', {
             method: 'POST', 
             headers: {

@@ -43,8 +43,8 @@ app.use(express.static(path.join(__dirname, 'frontend')))
 
 
 
- app.post('/api/change', async (req, res) => {
-  //console.log(req.body)
+ app.post('/change', async (req, res) => {
+   console.log(req.body)
    const { token, newPassword } = req.body
     
     if(!newPassword) {
@@ -77,7 +77,7 @@ app.use(express.static(path.join(__dirname, 'frontend')))
   
 
  app.post('/login', async (req, res) => {
-  //console.log(req.body)
+  console.log(req.body)
   const {name, email, password} = req.body
 
      User = await user.findOne({email}).lean()

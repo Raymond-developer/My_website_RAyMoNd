@@ -15,85 +15,170 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> QUIZ </title>
 <style>
-  body{
-   font-family: Roboto;
-   background-color: rgb(17, 17, 202) ;
-  }
-  .top-div{
-    margin-top: 50px;
-    width: 555px;
-    margin-left: 500px;
-    height: 600px;
-    border: 3px solid gray;
-    border-radius: 7px;
-    background-color: white;
+ /* === MOBILE: 320px+ === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Roboto, Arial, sans-serif;
+  background-color: rgb(17, 17, 202);
+  padding: 20px 4%;
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+html, body {
+  height: 100%;
+}
+
+.top-div {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 555px;
+  margin-left: 0;
+  height: auto;
+  min-height: 500px;
+  border: 3px solid gray;
+  border-radius: 7px;
+  background-color: white;
+  padding: 20px 4%;
+}
+
+.simple {
+  margin-left: 0;
+  padding-bottom: 20px;
+  border-bottom: 2px solid gray;
+  margin-bottom: 20px;
+}
+
+.question {
+  margin-left: 0;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  margin-top: 0;
+  line-height: 130%;
+}
+
+.btn {
+  display: block;
+  margin-left: 0;
+  padding: 12px 5%;
+  width: 100%;
+  margin-bottom: 15px;
+  border-radius: 7px;
+  border: 3px solid gray;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  background-color: #fff;
+}
+
+.btn:hover:not([disabled]) {
+  background: rgb(44, 43, 43);
+  color: rgb(245, 241, 241);
+}
+
+.btn:disabled {
+  cursor: no-drop;
+}
+
+.next-btn {
+  margin-top: 10px;
+  margin-left: 0;
+  font-size: 18px;
+  font-weight: 600;
+  background-color: rgb(14, 14, 197);
+  color: white;
+  width: 100%;
+  padding: 12px 5%;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  display: none;
+}
+
+.next-btn:hover {
+  background: rgb(7, 7, 7);
+  color: rgb(245, 241, 241);
+}
+
+.correct {
+  background-color: rgb(20, 230, 20);
+  color: #fff;
+  border-color: rgb(20, 230, 20);
+}
+
+.incorrect {
+  background-color: rgb(238, 19, 19);
+  color: #fff;
+  border-color: rgb(238, 19, 19);
+}
+
+/* === TABLET: 600px+ === */
+@media (min-width: 600px) {
+  body {
+    padding: 30px 5%;
+    align-items: center;
   }
 
-  .btn {
-    display: block;
-    margin-left: 15px;
-    padding-bottom: 15px;
-    padding-left: 20px;
-    width: 525px;
-    padding-top: 15px;
-    margin-bottom: 40px;
-    border-radius: 7px;
-    border: 3px solid gray;
-    font-size: 20px;
-    font-weight: 600;
-    display: grid;
-    justify-content: start;
-    cursor: pointer;
+ .top-div {
+    margin-top: 0;
+    padding: 25px 5%;
+    min-height: 550px;
   }
 
-  .btn:hover:not([disabled]){
-    background: rgb(44, 43, 43);
-    color: rgb(245, 241, 241);
-  }
-
-  .btn:disabled{
-    cursor: no-drop;
-  }
-
-  .question{
-    margin-left: 15px;
-    font-size: 25px;
-    font-weight: 600;
+ .question {
+    font-size: 22px;
     margin-bottom: 25px;
-    margin-top: -10px;
   }
 
-  .next-btn{
-    margin-top: -12px;
-    margin-left: 200px;
-    font-size: 25px;
-    font-weight: 600;
-    background-color: rgb(14, 14, 197);
-    color: white;
-    width: 120px;
-    cursor: pointer;
+ .btn {
+    font-size: 18px;
+    padding: 14px 4%;
+    margin-bottom: 20px;
+  }
+
+ .next-btn {
+    font-size: 20px;
+    width: 150px;
+    margin-left: auto;
+    margin-right: auto;
     display: none;
   }
 
-  .next-btn:hover{
-    background: rgb(7, 7, 7);
-    color: rgb(245, 241, 241);
+ .simple {
+    padding-bottom: 25px;
+  }
+}
+
+/* === DESKTOP: 1024px+ === */
+@media (min-width: 1024px) {
+ .top-div {
+    min-height: 600px;
   }
 
-  .simple{
-   margin-left: 15px; 
-   padding-bottom: 30px;
-   border-bottom: 2px solid gray;
-
+ .question {
+    font-size: 25px;
   }
 
-  .correct{
-    background-color: rgb(20, 230, 20);
+ .btn {
+    font-size: 20px;
   }
 
-  .incorrect{
-    background-color: rgb(238, 19, 19);
+ .next-btn {
+    font-size: 22px;
+    width: 120px;
+    margin-left: 200px;
+    margin-right: 0;
   }
+}
 </style>
 </head>
 <body>
