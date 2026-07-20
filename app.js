@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken')
 const path = require('path');
 const bordyparser = require('body-parser')
 const dotenv = require('dotenv').config()
+const axios = require('axios')
 
 
 const port = process.env.PORT || 8000
@@ -159,6 +160,52 @@ app.post('/create', (req, res) => {
 
   res.json({status: 'ok', data: select, input: 'input'})
 })
+
+
+    
+
+app.post('/payment', async (req, res) => {
+  console.log(req.body)
+  const { price, email} = req.body
+
+  try{
+
+   const url = 'https://api.paystack.co/transaction/initialize';
+  
+      const response = await axios.post(url, {
+        email, 
+        amount: price * 100,
+        currency: 'NGN',
+        Callback_url: 'https://my-project-three-psi-85.vercel.app/callback'
+        },
+       
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_KEY}`,
+        },
+      }
+    )
+    res.status(200).json(response.data)
+
+  }catch(err) {
+   
+    console.log(err)
+  }   
+})
+
+
+ app.post('webhook', express.json(), (req, res) => {
+   const event = req.body;
+ 
+   if(event.event === 'Charge.success') {
+     console.log(event.data)
+ 
+     const payment = event.data
+   }
+ 
+   res.status(200).json({success: true})
+ }) 
+ 
 
   app.listen(port, 
     console.log('server is running on port 8000')

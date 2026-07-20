@@ -17,28 +17,103 @@
   <title>Document</title>
 
   <style>
-     body{
-      background-image: url("photo_2026-07-04_21-32-33.jpg");
-      }
-      button{
-      font-size: 25px;
-      font-weight: 700;
-      margin: 7px;
-      padding: 10px;
-      border-radius: 5px;
-    }
+    
+   body {
+  background-image: url("photo_2026-07-04_21-32-33.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
 
-    .grid{
-    display: grid;
-    justify-self: center;
-    align-items: center;
-    }
+h1{
+  display: grid;
+  justify-content: center;
+}
 
-    .para{
-      font-size: 35px;
-      font-weight: 700;
-      margin-top: 250px;
-    }
+button {
+  font-size: 25px;
+  font-weight: 700;
+  margin: 7px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.grid {
+  display: grid;
+  justify-self: center;
+  align-items: center;
+}
+
+.para {
+  font-size: 35px;
+  font-weight: 700;
+  margin-top: 250px;
+  text-align: center;
+  padding: 0 5%;
+}
+
+/* Laptop: 1024px and up - your original sizes */
+@media screen and (max-width: 1024px) {
+  button {
+    font-size: 22px;
+    padding: 9px;
+  }
+  .para {
+    font-size: 32px;
+    margin-top: 200px;
+  }
+
+  h1{
+  display: grid;
+  justify-content: center;
+}
+}
+
+/* Tablet: 768px to 1023px */
+@media screen and (max-width: 768px) {
+  button {
+    font-size: 20px;
+    padding: 8px;
+    margin: 6px;
+  }
+  .para {
+    font-size: 28px;
+    margin-top: 150px;
+    padding: 0 8%;
+  }
+
+  h1{
+  display: grid;
+  justify-content: center;
+}
+}
+
+/* Phone: 767px and below */
+@media screen and (max-width: 480px) {
+  button {
+    font-size: 18px;
+    padding: 8px;
+    margin: 5px;
+    width: 90%;
+  }
+  .para {
+    font-size: 24px;
+    margin-top: 100px;
+    padding: 0 10%;
+  }
+  .grid {
+    width: 100%;
+  }
+
+  h1{
+  display: grid;
+  justify-content: center;
+}
+}
+
   </style>
 </head>
 <body>
@@ -53,12 +128,15 @@
 
 
   <div class="grid">
-   <div> <button class="Calculator"> Calculator </button> </div>
-   <div> <button class="product"> Expense </button> </div>
-   <div> <button class="quiz"> Quiz </button> </div>
-   <div> <button class="todo"> Todo </button> </div>
-    <div> <button class="game"> game </button> </div>
-
+   <span> <button class="Calculator"> Calculator </button> 
+  <span>  <button class="expense"> Expense </button> </span> </span>
+   
+   <div> <button class="quiz"> Quiz </button>  
+   <span> <button class="todo"> Todo </button> </span> </div>
+   
+    <div> <button class="game"> game </button> 
+    <span> <button class="product"> Product </button> </span>  </div>
+    
   </div>
 
   <script>
@@ -70,14 +148,15 @@
                   const changep = document.querySelector('.changep')
                      const game = document.querySelector('.game')
                       const logout = document.querySelector('.logout')
+                      
 
    calculator.addEventListener('click', () => {
-   // console.log('hello')
       window.location.href="calculate.html"
    })         
    
    product.addEventListener('click', () => {
-     window.location.href="expense.html"
+    // here 
+     window.location.href="../Youtube-Project-course/amazon.html"
    })
 
    quiz.addEventListener('click', () => {
@@ -101,6 +180,10 @@
      window.location.href="register.html"
      localStorage.removeItem('token')
     
+   })
+
+   expense.addEventListener('click', () => {
+     window.location.href="expense.html"
    })
   </script>
 </body>
