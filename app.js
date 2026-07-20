@@ -34,8 +34,6 @@ app.use(bordyparser())
 
 app.use(express.static(path.join(__dirname, 'frontend')))
 
-app.use(express.static(path.join(__dirname, 'frontend', 'Youtube-Project-course')))
-
   let token = '';
 
  let User = '';
@@ -213,4 +211,3 @@ app.post('/payment', async (req, res) => {
     console.log('server is running on port 8000')
   )
   
-  module.export = app
