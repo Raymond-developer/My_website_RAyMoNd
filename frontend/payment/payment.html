@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Payment </title>
+  <style>
+    label{
+      display: block;
+      font-size: 25px;
+      padding: 10px;
+    }
+
+    input{
+      width: 400px;
+     font-size: 25px;
+     padding: 10px;
+     margin-top: 5px;
+    }
+    div{
+      display: grid;
+      justify-content: center;
+    }
+
+    button{
+      width: 200px;
+       font-size: 25px;
+      padding: 7px;
+      display: block;
+      margin-top: 30px;
+      color: blue;
+      border-radius: 9px;
+      margin-left: 100px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <form class="form">
+  <label>first name </label>
+  <input type="text" placeholder="first name">
+  <label> last name </label>
+    <input type="text" placeholder="last name">
+  <label> amount </label>
+    <input class="amount" type="text" placeholder="amount">
+  <label> Email </label>
+    <input class="email" type="email" placeholder="email">
+    <button class="btn"> pay now </button>
+    </form>
+    </div>
+    <script>
+
+    document.querySelector('.form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+       const amount =  document.querySelector('.amount').value
+      const email = document.querySelector('.email').value
+       const response = await fetch('http://localhost:4000/payments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+        amount,
+        email
+        })
+      })
+
+      const payment = await response.json();
+      console.log(payment)
+  
+     window.location.href = payment.data.authorization_url
+
+    })
+    </script>
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+   <html>
+      <head>
+
+          <script>
+            // This runs before the page shows
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+              // Not logged in? Kick out immediately
+              window.location.replace('/login.html');
+            }
+          </script>
+
+         <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+        <style>
+            
+            body {
+            padding-bottom: 400px;
+          }
+
+          .double-dot {
+           border: 1px;
+            border: double;
+            height: 260px;
+            width: 800px;
+            margin-left: 130px;
+            margin-bottom: 15px;
+            display: inline-block;
+            
+          }
+
+          .cart-item {
+            margin-left: 20px;
+            display: inline-block;
+
+
+          }
+
+          .review-order {
+            display: block;
+            font-family: Roboto;
+            font-size: 25px;
+            margin-top: 145px; 
+            margin-left: 130px;
+            margin-bottom: 20px;
+          }
+
+          .flex-row {
+            display: flex;
+            flex-direction: row;
+            height: 50px;
+            position: fixed;
+            align-items: top;
+            background-color: white;
+            margin-top: -145px;
+            z-index: 100;
+            padding-top: 10px;
+          }
+
+          .left-section {
+            width: 680px;
+          }
+
+          .middle-section {
+            width: 460px;
+          }
+
+          .right-section {
+            width: 680px;   
+          }
+
+          .paragraph-pp {
+            font-family: Roboto;
+            color: green;
+            padding-top: 8px;
+            font-size: 20px;
+            
+          }
+
+          .images-order {
+            height: 125px;
+            padding-right: 32px;
+            width: 110px;
+          }
+
+          .div-height {
+            display: inline-block;
+            width: 120px;
+            position: relative;
+          }
+
+          .name-price {
+            font-family: Roboto;
+            font-size: 23px;
+            display: flex;
+            vertical-align: top;
+            width: 320px;
+            display: inline-block;
+            position: relative;
+          }
+
+          .item-name {
+            font-family: Roboto;
+            font-weight: 700;
+            font-size: 21px;
+          }
+
+          .price-cents {
+            font-family: Roboto;
+            color: rgb(240, 9, 9);
+            padding-top: 8px;
+            padding-bottom: 5px;
+            font-size: 21px;
+            font-weight: 700;
+          }
+
+          .update-delete {
+            font-size: 21px;
+            color: blue;
+            margin-left: 2px;
+            
+            
+          }
+
+          .right-item {
+            width: 260px;
+            display: inline-block;
+            margin-left: 20px;
+            margin-top: 10px;
+            position: absolute;
+            padding-top: 63px;
+            padding-right: 20px;
+            
+            
+            
+          }
+
+          .date-class {
+            font-family: Roboto;
+            font-weight: 500;
+            font-size: 18px;
+            color: green;
+            padding-left: 25px;
+          }
+
+          .price-class {
+            width: 170px;
+            color: gray;
+            padding-bottom: 10px;
+            margin-right: 36px;
+            font-size: 18px;
+          }
+
+          .delivery-date {
+            font-family: Roboto;
+            padding-bottom: 10px;
+            font-size: 18px;
+            
+          }
+
+          .input-class {
+            padding-bottom: 10px;
+            font-size: 30px;
+            
+          }
+
+          .order-summary {
+            font-family: Roboto;
+            width: 380px;
+            display: inline-block;
+            margin-left: 10px;
+            height: 380px;
+            position: absolute;
+            margin-left: 950px;
+            font-size: 20px;
+            font-weight: 600;
+            border: 1px;
+            border: double;
+
+          }
+
+          .div-inline {
+            display: inline-block;
+            
+          }
+
+          .grid-colume {
+            display: grid;
+            grid-template-columns: 800px 1fr;
+            position: relative;
+            display: inline-block;
+            width: 2px;
+            
+          }
+
+          .order-margin {
+            padding-bottom: 14px;
+            padding-left: 20px;
+          }
+          .order-1 {
+             padding-right: 180px;
+          }
+
+          .order-2 {
+              padding-right: 97px;
+          }
+
+          .order-3 {
+             padding-right: 125px;
+          }
+
+          .order-4 {
+             padding-right: 91px;
+          }
+
+          .order-5 {
+            padding-right: 170px;
+          }
+
+          .total-amount {
+            padding-left: 20px;
+            margin-top: 20px;
+            margin-bottom: 40px;
+          }
+
+          .order-strong {
+            font-size: 25px;
+            padding-top: 14px;
+          }
+
+          .place-order {
+            margin-left: 17px;
+            padding-left: 75px;
+            padding-right: 75px;
+            padding-top: 12px;
+            padding-bottom: 12px;
+            border-radius: 20px;
+            background-color:  rgb(252, 239, 5);
+            color: black;
+            border: solid;
+            border: 1px;
+            cursor: pointer;
+            font-size: 20px;
+          }
+
+          .place-order:hover {
+              background-color:  rgb(253, 245, 88);
+          }
+
+          .amazon-logo {
+            width: 140px;
+            padding-left: 170px;
+          }
+
+          .lock-icon {
+            width: 25px;
+            padding-left: 440px;
+
+          }
+
+          .check-3 {
+            font-family: Roboto;
+            font-size: 35px;
+            font-weight: 500;
+            padding-left: 70px;
+          }
+
+          .update-delete:hover {
+            color: green;
+          }
+
+          .last-div {
+            
+          display: inline-block;
+            
+          }
+          .order-1 {
+  padding-right: 180px;
+}
+
+.order-2 {
+  padding-right: 97px;
+}
+
+.order-3 {
+  padding-right: 125px;
+}
+
+.order-4 {
+  padding-right: 91px;
+}
+
+.order-5 {
+  padding-right: 170px;
+}
+
+.total-amount {
+  padding-left: 20px;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.order-strong {
+  font-size: 25px;
+  padding-top: 14px;
+}
+
+.place-order {
+  margin-left: 17px;
+  padding-left: 75px;
+  padding-right: 75px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-radius: 20px;
+  background-color: rgb(252, 239, 5);
+  color: black;
+  border: 1px solid black;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.place-order:hover {
+  background-color: rgb(253, 245, 88);
+}
+
+.amazon-logo {
+  width: 140px;
+  padding-left: 170px;
+}
+
+.lock-icon {
+  width: 25px;
+  padding-left: 440px;
+}
+
+.check-3 {
+  font-family: Roboto;
+  font-size: 35px;
+  font-weight: 500;
+  padding-left: 70px;
+}
+
+.update-delete:hover {
+  color: green;
+}
+
+.last-div {
+  display: inline-block;
+}
+
+/* Laptop: 1024px to 1439px */
+@media screen and (max-width: 1439px) {
+  .order-1 {
+    padding-right: 140px;
+  }
+  .order-5 {
+    padding-right: 130px;
+  }
+  .amazon-logo {
+    padding-left: 120px;
+  }
+  .lock-icon {
+    padding-left: 300px;
+  }
+  .check-3 {
+    font-size: 32px;
+    padding-left: 50px;
+  }
+}
+
+/* Tablet: 768px to 1023px */
+@media screen and (max-width: 1023px) {
+  .order-1 {
+    padding-right: 100px;
+  }
+  .order-2 {
+    padding-right: 70px;
+  }
+  .order-3 {
+    padding-right: 90px;
+  }
+  .order-4 {
+    padding-right: 65px;
+  }
+  .order-5 {
+    padding-right: 90px;
+  }
+  .order-strong {
+    font-size: 22px;
+  }
+  .place-order {
+    padding-left: 60px;
+    padding-right: 60px;
+    font-size: 18px;
+  }
+  .amazon-logo {
+    width: 120px;
+    padding-left: 8%;
+  }
+  .lock-icon {
+    width: 22px;
+    padding-left: 25%;
+  }
+  .check-3 {
+    font-size: 28px;
+    padding-left: 5%;
+  }
+  .total-amount {
+    padding-left: 5%;
+  }
+}
+
+/* Phone: 767px and below */
+@media screen and (max-width: 767px) {
+  .order-1,
+  .order-2,
+  .order-3,
+  .order-4,
+  .order-5 {
+    padding-right: 10%;
+  }
+  .order-strong {
+    font-size: 20px;
+    padding-top: 10px;
+  }
+  .place-order {
+    margin-left: 5%;
+    padding-left: 0;
+    padding-right: 0;
+    width: 90%;
+    font-size: 16px;
+  }
+  .total-amount {
+    padding-left: 5%;
+    margin-top: 15px;
+    margin-bottom: 30px;
+  }
+  .amazon-logo {
+    width: 100px;
+    padding-left: 5%;
+  }
+  .lock-icon {
+    width: 20px;
+    padding-left: 15%;
+  }
+  .check-3 {
+    font-size: 24px;
+    padding-left: 5%;
+  }
+  .last-div {
+    width: 100%;
+  }
+}
+
+/* Small Phone: 480px and below */
+@media screen and (max-width: 480px) {
+  .order-1,
+  .order-2,
+  .order-3,
+  .order-4,
+  .order-5 {
+    padding-right: 5%;
+  }
+  .order-strong {
+    font-size: 18px;
+  }
+  .place-order {
+    font-size: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .amazon-logo {
+    width: 90px;
+  }
+  .lock-icon {
+    width: 18px;
+    padding-left: 10%;
+  }
+  .check-3 {
+    font-size: 20px;
+  }
+}
+
+        </style>
+      </head>
+      <body>
+        <div class="flex-row">
+           <a href="amazon.html">
+            <div class="left-section"> <img class="amazon-logo" src="checkout-images/amazon-logo.png"> </div>
+          </a>
+          
+          <div class="middle-section"> <span class="check-3"> Checkout (3 items) </span>  </div>
+          <div class="right-section"> <img class="lock-icon" src="checkout-images/checkout-lock-icon.png"> </div>
+        </div>
+       
+
+             
+
+          
+          <div class="review-order"> <strong> Review Your Order </strong> </div>  
+        
+         <div class="grid-colume">
+          <div class="last-div js-order-summary">  
+               
+        </div>
+         </div>
+        
+
+        
+           
+
+         <div class="order-summary js-payment-summary">
+           
+         </div>
+        
+         </div>
+         </div>
+        
+          <script type="module" src="scripts/checkout.js"></script>
+          
+      </body>
+   </html>    
