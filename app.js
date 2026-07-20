@@ -34,6 +34,8 @@ app.use(bordyparser())
 
 app.use(express.static(path.join(__dirname, 'frontend')))
 
+app.use(express.static(path.join(__dirname, 'frontend', 'Youtube-Project-course')))
+
   let token = '';
 
  let User = '';
