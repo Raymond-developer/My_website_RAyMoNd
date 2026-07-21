@@ -76,44 +76,6 @@
     })
      
    
-
-   /* document.querySelector('.js-place-order')
-    .addEventListener('click', async () => {
-    const response = await fetch('http://localhost:7000/order', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      cart: Cart
-    })
-  });
-
-const order = await response.json();
-   
- Cart.forEach((loopcart) => {
-  const carti = loopcart.quantity
-
-  const cartid = loopcart.productId
-
- order.forEach((orders) => {
-  if (cartid === orders.id) {
-    
-     orderArray.push(orders)  
-      saveToStorage();
-      // console.log(orderArray)
-   }
-
-   orderray.push(totalCents)
-   console.log(array)
-    
-}); 
-});
- 
-  
-  window.location.href = 'order.html';
-}); */
-   
 }
 
 renderPaymentSummary();

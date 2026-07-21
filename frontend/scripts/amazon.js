@@ -1,6 +1,6 @@
-
-
 import { Cart, addToCart } from "../data/cart.js";
+
+
 export function getProduct(productId) {
    let matchingProduct;
 
