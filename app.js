@@ -179,7 +179,7 @@ app.post('/payment', async (req, res) => {
         email, 
         amount: price * 100,
         currency: 'NGN',
-        Callback_url: 'https://my-project-three-psi-85.vercel.app/callback'
+        Callback_url: 'https://my-website-r-ay-mo-nd.vercel.app/callback'
         },
        
       {

@@ -58,8 +58,8 @@
 
     document.querySelector('.js-place-order').addEventListener('click', async () => {
       //http://localhost:7000
-      //https://my-project-three-psi-85.vercel.app
-      const response = await fetch('https://my-project-three-psi-85.vercel.app/payment', {
+      //https://my-website-r-ay-mo-nd.vercel.app/
+      const response = await fetch('https://my-website-r-ay-mo-nd.vercel.app/payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
