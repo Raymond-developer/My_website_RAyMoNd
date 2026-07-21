@@ -26,11 +26,11 @@
             
 
           .double-dot {
-           border: 1px;
+           border: 3px;
             border: double;
             height: 340px;
             width: 800px;
-            margin-left: 100px;
+            margin-left: 80px;
             margin-bottom: 15px;
             display: inline-block;
             
@@ -80,7 +80,7 @@
             font-family: Roboto;
             color: green;
             padding-top: 8px;
-            font-size: 23px;
+            font-size: 28px;
             font-weight: 700;
             
           }
@@ -88,9 +88,9 @@
           
 
           .images-order {
-            height: 125px;
+            height: 150px;
             padding-right: 32px;
-            width: 110px;
+            width: 125px;
           }
 
           .div-height {
@@ -101,7 +101,7 @@
 
           .name-price {
             font-family: Roboto;
-            font-size: 23px;
+            font-size: 27px;
             display: flex;
             font-weight: 700;
             vertical-align: top;
@@ -113,7 +113,7 @@
           .item-name {
             font-family: Roboto;
             font-weight: 700;
-            font-size: 23px;
+            font-size: 27px;
             font-weight: 700;
           }
 
@@ -122,12 +122,12 @@
             color: rgb(240, 9, 9);
             padding-top: 8px;
             padding-bottom: 5px;
-            font-size: 23px;
+            font-size: 27px;
             font-weight: 700;
           }
 
           .update-delete {
-            font-size: 23px;
+            font-size: 27px;
             color: blue;
             margin-left: 2px;
             font-weight: 700;
@@ -137,6 +137,7 @@
           strong{
             font-size: 22px;
              font-weight: 700;
+             width: 0px;
           }
 
           .right-item {
@@ -148,25 +149,30 @@
             padding-top: 63px;
             padding-right: 20px;
             
-            
-            
+          }
+
+          .last-review{
+            font-family: Roboto;
+            font-weight: 700;
+            font-size: 30px;
           }
 
           .date-class {
             font-family: Roboto;
             font-weight: 700;
-            font-size: 22px;
+            font-size: 25px;
             color: green;
             padding-left: 25px;
+            width: 250px;
           }
 
           .price-class {
-            width: 200px;
+            width: 230px;
             color: gray;
             font-weight: 700;
             padding-bottom: 10px;
             margin-right: 36px;
-            font-size: 22px;
+            font-size: 25px;
           }
 
           .delivery-date {
@@ -187,13 +193,12 @@
             font-family: Roboto;
             width: 380px;
             display: inline-block;
-            margin-left: 10px;
-            height: 380px;
+            height: 410px;
             position: absolute;
-            margin-left: 950px;
+            margin-left: 880px;
             font-size: 20px;
             font-weight: 600;
-            border: 1px;
+            border: 3px;
             border: double;
 
           }
@@ -216,30 +221,25 @@
             padding-bottom: 14px;
             padding-left: 20px;
           }
-          .order-1 {
+          .order-1, .order-2, .order-3, .order-4, .order-5 {
              padding-right: 180px;
+             font-size: 21px;
+             font-weight: 700;
+             width: 30px;
           }
-
-          .order-2 {
-              padding-right: 97px;
-          }
-
-          .order-3 {
-             padding-right: 125px;
-          }
-
-          .order-4 {
-             padding-right: 91px;
-          }
-
-          .order-5 {
-            padding-right: 170px;
+            
+          span{
+            font-size: 25px;
+             font-weight: 700;
+             margin-right: px;
           }
 
           .total-amount {
             padding-left: 20px;
             margin-top: 20px;
             margin-bottom: 40px;
+            font-size: 30px;
+             font-weight: 700;
           }
 
           .order-strong {
@@ -248,10 +248,12 @@
           }
 
           .place-order {
+            display: grid;
+            justify-content: center;
             margin-left: 17px;
             padding-left: 75px;
             padding-right: 75px;
-            padding-top: 12px;
+            margin-top: -px;
             padding-bottom: 12px;
             border-radius: 20px;
             background-color:  rgb(252, 239, 5);
@@ -408,9 +410,10 @@
     font-size: 22px;
   }
   .place-order {
-    padding-left: 60px;
-    padding-right: 60px;
-    font-size: 18px;
+    margin-top: -30px;
+    margin-left: 75px;
+    font-size: 25px;
+    font-weight: 700;
   }
   .amazon-logo {
     width: 120px;
@@ -443,6 +446,8 @@
   .order-4,
   .order-5 {
     padding-right: 10%;
+    font-size: 26px;
+    font-weight: 700;
   }
 
   .paragraph-pp, .name-price, .item-name, .price-cents, .update-delete, .price-class {
@@ -498,6 +503,8 @@
   .order-4,
   .order-5 {
     padding-right: 5%;
+    font-size: 26px;
+    font-weight: 700;
   }
   .order-strong {
     font-size: 18px;
@@ -526,10 +533,6 @@
    font-weight: 700;
   }
 
-
-  .double-dot{
-
-  }
 }
  
 
@@ -572,13 +575,43 @@
             </div>
           </div>
         </div>
+
+
+        jhgfdsadfghjkl;lkjhgfdsdfgh;kjhgfdsfghjkjhgfdfghjkjhc
+
+
+         <div class="order-margin">
+            <div class="order-strong"> Order Summary</div>
+          </div>
+
+           <div class="order-margin">  <span class="order-1">items (3): </span>  <span> $${(productPriceCents / 100).toFixed(2)}</span>
+           </div>     
+
+           <div class="order-margin"> <span class="order-2"> Shipping & handling </span> <span> $${(shippingPriceCents / 100).toFixed(2)}</span>
+           </div>
+
+            <div class="order-margin">
+              <span class="order-3"> Total before tax </span> <span> $${(totalBeforeTaxCents / 100).toFixed(2)}</span>
+            </div>
+
+             <div class="order-margin">
+               <span class="order-4"> Estimated tax (10%):</span> <span> $${(taxCents / 100).toFixed(2)}</span>
+             </div>
+
+          <div>_______________________________________</div>
+           
+           <div class="total-amount">
+              <span> <strong class="order-5">Order total:</strong> </span> <span> <strong> $${(totalCents / 100).toFixed(2)} </strong> </span>
+           </div>
+            
+           <button class="place-order js-place-order"> pay now </button>
         -->
        
 
              
 
           
-          <div class="review-order"> <strong> Review Your Order </strong> </div>  
+          <div class="review-order"> <strong class="last-review"> Review Your Order </strong> </div>  
         
          <div class="grid-colume">
           <div class="last-div js-order-summary">  
