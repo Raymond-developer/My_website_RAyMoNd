@@ -3,5 +3,4 @@
  
 
 renderOrderSummary();
-//renderOrderSummary();
 renderPaymentSummary()

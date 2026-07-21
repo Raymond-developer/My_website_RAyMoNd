@@ -1,16 +1,20 @@
-const express = require('express')
+import express from 'express'
+import { fileURLToPath } from 'url'
+// Recreate __dirname for ESM
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 const app = express()
-const mongoose = require('mongoose')
-const user = require('./model/user')
-const mongodb = require('./model/schema')
-const cors = require('cors')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const path = require('path');
-const bordyparser = require('body-parser')
-const dotenv = require('dotenv').config()
-const axios = require('axios')
-
+import mongoose from 'mongoose'
+import user from './model/user.js';
+// import mongodb from './model/schema.js';
+import cors from 'cors'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import path from 'path'
+import bordyparser from 'body-parser'
+import dotenv from 'dotenv'
+import axios from 'axios'
+dotenv.config()
 
 const port = process.env.PORT || 8000
 const JWT_SECRET = process.env.JWT_SECRET
@@ -32,7 +36,7 @@ app.use(cors())
 app.use(express.json())
 app.use(bordyparser())
 
-app.use(express.static(path.join(__dirname, 'frontend')))
+ app.use(express.static(path.join(__dirname, 'frontend')))
 
   let token = '';
 
@@ -40,7 +44,7 @@ app.use(express.static(path.join(__dirname, 'frontend')))
 
   app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'register.html'));
- })
+ }) 
 
 
 
@@ -88,7 +92,6 @@ app.use(express.static(path.join(__dirname, 'frontend')))
     return res.json({status: 'error', error: 'Invalid username/password'})
    }
     
-
     const bcryptcheck = await bcrypt.compare(password, User.password)
 
    
@@ -107,7 +110,7 @@ app.use(express.static(path.join(__dirname, 'frontend')))
 
  
 app.post('/register', async (req, res) => {
-   //console.log(req.body)
+   console.log(req.body)
    const {name, email, passwords} = req.body
 
     if(!name || typeof name !== 'string') {

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+/*import mongoose from 'mongoose'
 
 const UserSchem = new mongoose.Schema({
      inn: { type: String, required: true},
@@ -11,4 +11,4 @@ const UserSchem = new mongoose.Schema({
   ) 
   const mongodb = mongoose.model('schema', UserSchem)
 
-  module.exports = mongodb
+  module.exports = mongodb */
