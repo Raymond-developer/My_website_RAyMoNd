@@ -41,10 +41,14 @@ button {
   border-radius: 5px;
 }
 
+button:hover{
+  background-color: blue;
+}
 .grid {
   display: grid;
   justify-self: center;
   align-items: center;
+  margin-top: -10px;
 }
 
 .para {
@@ -142,6 +146,7 @@ button {
   margin-top: -15px;
   margin-bottom: -15px;
 }
+
   </style>
 </head>
 <body>
@@ -158,6 +163,7 @@ button {
    <h2 class="test"></h2> 
 
   <div class="grid">
+    <button class="Note"> Note </button> 
    <span> <button class="Calculator"> Calculator </button> 
   <span>  <button class="expense"> Expense </button> </span> </span>
    
@@ -206,7 +212,7 @@ button {
                   const changep = document.querySelector('.changep')
                      const game = document.querySelector('.game')
                       const logout = document.querySelector('.logout')
-                      
+    const Note = document.querySelector('.Note')                  
 
       
      
@@ -214,7 +220,11 @@ button {
    calculator.addEventListener('click', () => {
       window.location.href="calculate.html"
    })  
-   
+     
+   Note.addEventListener('click', () => {
+      window.location.href="note.html"
+   })
+
    product.addEventListener('click', () => {
     // here 
      window.location.href="amazon.html"

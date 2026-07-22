@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <script>
+  const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+   </script> 
+  
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes with Edit & Delete</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #f9f9f9;
+        }
+        
+        .input-area {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .save-btn {
+            background: #0d6efd;
+            color: white;
+            font-size: 25px;
+            font-weight: 700;
+        }
+        
+        .edit-btn {
+            background: #ffc107;
+            color: black;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .note {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .note h3 {
+            margin: 0 0 8px 0;
+        }
+        
+        .note p {
+            margin: 0 0 12px 0;
+            color: rgb(20, 19, 19);
+            white-space: pre-wrap;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .note {
+          font-size: 25px;
+          font-weight: 700;
+          color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Notes App</h1>
+    
+    <div class="input-area">
+        <input class="note" type="text" id="titleInput" placeholder="Title">
+        <textarea class="note" id="contentInput" placeholder="Your note..."> </textarea>
+        <button class="save-btn" id="saveBtn">Save Note</button>
+    </div>
+    
+    <div id="notesList"></div>
+
+    <script>
+      //localStorage.removeItem('notes')
+        const titleInput = document.getElementById('titleInput')
+        const contentInput = document.getElementById('contentInput')
+        const saveBtn = document.getElementById('saveBtn')
+        const notesList = document.getElementById('notesList')
+        
+        let notes = JSON.parse(localStorage.getItem('notes')) || []
+        let editId = null
+        
+        // Render all notes
+        function renderNotes() {
+            if (notes.length === 0) {
+                notesList.innerHTML = '<p style="text-align:center; color:#999;">No notes yet</p>'
+                return
+            }
+            
+            notesList.innerHTML = notes.map(note => `
+                <div class="note">
+                    <h3>${note.title}</h3>
+                    <p>${note.content}</p>
+                    <div class="btn-group">
+                        <button class="edit-btn" onclick="editNote(${note.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteNote(${note.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('')
+        }
+        
+        // Save or update note
+        saveBtn.addEventListener('click', () => {
+            const title = titleInput.value.trim()
+            const content = contentInput.value.trim()
+            
+            if (!title && !content) return alert('Note is empty')
+            
+            if (editId) {
+                // Update existing
+                notes = notes.map(note => note.id === editId 
+                        ? {...note, title, content }
+                        : note
+                )
+                editId = null
+                saveBtn.textContent = 'Save Note'
+            } else {
+                // Add new
+                notes.unshift({
+                    id: Date.now(),
+                    title: title || 'Untitled',
+                    content
+                })
+            }
+            
+            localStorage.setItem('notes', JSON.stringify(notes))
+            titleInput.value = ''
+            contentInput.value = ''
+            renderNotes()
+        })
+        
+        // Edit note - fills inputs with existing data
+        function editNote(id) {
+            const note = notes.find(n => n.id === id)
+            titleInput.value = note.title
+            contentInput.value = note.content
+            editId = id
+            saveBtn.textContent = 'Update Note'
+            window.scrollTo(0, 0)
+        }
+        
+        // Delete note from localStorage
+        function deleteNote(id) {
+            if (!confirm('Delete this note?')) return
+            notes = notes.filter(n => n.id !== id)
+            localStorage.setItem('notes', JSON.stringify(notes))
+            renderNotes()
+        }
+        
+        // Load notes on page load
+        renderNotes()
+    </script>
+</body>
+</html>
