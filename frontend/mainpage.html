@@ -125,6 +125,7 @@ button {
 
 .test{
   display: flex;
+  padding: 15px;
   justify-content: center;
   align-items: baseline;
   font-size: 20px;
@@ -177,7 +178,7 @@ button {
       setTimeout(() => {
        const name = document.querySelector('.test')
        const localName = localStorage.getItem('Name')
-       name.innerHTML = ` Welcome ${localName} we are glad to have you `
+       name.innerHTML = ` Welcome ${localName} nice having you! `
       }, 2000)
 
       setTimeout(() => {
