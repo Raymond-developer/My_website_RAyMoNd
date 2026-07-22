@@ -86,7 +86,7 @@ app.use(bordyparser())
   const {name, email, password} = req.body
 
      User = await user.findOne({email}).lean()
-     console.log(User)
+     //console.log(User)
    
    if(!User) {
     return res.json({status: 'error', error: 'Invalid username/password'})
@@ -105,7 +105,7 @@ app.use(bordyparser())
         }, JWT_SECRET )
    
 
-   res.json({status:'ok', data: token })
+   res.json({status:'ok', data: token, Name: name })
 }) 
 
  

@@ -15,7 +15,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
-
+ <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <style>
     
    body {
@@ -123,18 +123,36 @@ button {
 }
 }
 
+.test{
+  padding: 20px 20px;
+  font-size: 30px;
+  font-weight: 700;
+  color: white;
+  height: 50px;
+  font-family: Roboto;
+}
+
+.count{
+  font-size: 40px;
+  display: grid;
+  justify-content: center;
+  margin-top: -15px;
+  margin-bottom: -15px;
+}
   </style>
 </head>
 <body>
 
   <div class="move">
   <h1 class="h1"> Welcome </h1>
+   <h2 class="count"> 1 </h2>
   <h1> Author: RAyMoNd</h1>
   </div>
     
     <div> <button class="logout"> Log out </button> </div>
    <div> <button class="changep"> Change password </button> </div>
 
+   <h1 class="test"></h1> 
 
   <div class="grid">
    <span> <button class="Calculator"> Calculator </button> 
@@ -149,6 +167,34 @@ button {
   </div>
 
   <script>
+
+
+     const Autoken = localStorage.getItem('token');
+
+    if (Autoken) {
+      setTimeout(() => {
+       const name = document.querySelector('.test')
+       const localName = localStorage.getItem('Name')
+       name.innerHTML = ` Welcome ${localName} we are glad to have you `
+      }, 2000)
+
+      setTimeout(() => {
+       const name = document.querySelector('.test')
+       name.innerHTML = ` Welcome Guest `
+      }, 15000)
+       
+     
+      setTimeout(() => {
+       const name = document.querySelector('.test')
+       name.innerHTML = ''
+      }, 180000)
+    }
+       let count = 0
+    setInterval(() => {
+     const countt = document.querySelector('.count')
+     countt.innerHTML = count
+     count++
+    }, 1000 )
    const calculator = document.querySelector('.Calculator')
       const product = document.querySelector('.product')
          const quiz = document.querySelector('.quiz')
@@ -159,9 +205,12 @@ button {
                       const logout = document.querySelector('.logout')
                       
 
+      
+     
+
    calculator.addEventListener('click', () => {
       window.location.href="calculate.html"
-   })         
+   })  
    
    product.addEventListener('click', () => {
     // here 
