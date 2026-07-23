@@ -4,25 +4,34 @@
     
      <script>
     // This runs before the page shows
-    const token = localStorage.getItem('token');
+   /* const token = localStorage.getItem('token');
 
     if (!token) {
       // Not logged in? Kick out immediately
       window.location.replace('/login.html');
-    }
+    } */
   </script>
     
     <title>Media Vault</title>
     <style>
         body { font-family: sans-serif; padding: 20px; max-width: 1000px; margin: auto; background: #f5f5f5; }
+
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
-        .item { border: 1px solid #ddd; padding: 10px; border-radius: 8px; background: white; }
-        .item img, .item video { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; cursor: pointer; }
+
+        .item { width: 350px; border: 1px solid #ddd; padding: 10px; border-radius: 8px; background: white; }
+
+        .item img, .item video { width: 100%; height: 300px; object-fit: cover; border-radius: 4px; cursor: pointer; }
+
         .item img:hover, .item video:hover { opacity: 0.8; }
+
         button { cursor: pointer; padding: 6px 12px; border: none; background: #007bff; color: white; border-radius: 4px; }
+
         button:hover { background: #0056b3; }
+
         .delete-btn { background: #dc3545; margin-top: 8px; width: 100%; }
+
         .delete-btn:hover { background: #c82333; }
+
         .controls { margin-bottom: 15px; }
         
         /* Modal / Lightbox */
@@ -32,15 +41,19 @@
             justify-content: center; align-items: center;
         }
         .modal.active { display: flex; }
+
         .modal-content { max-width: 90%; max-height: 90%; }
+
         .modal-content img, .modal-content video { 
             max-width: 100%; max-height: 90vh; border-radius: 8px; 
         }
+
         .close { 
             position: absolute; top: 20px; right: 35px; color: #f1f1f1; 
             font-size: 40px; font-weight: bold; cursor: pointer; 
         }
         .close:hover { color: #bbb; }
+
         .filename { color: #555; font-size: 12px; margin: 5px 0; word-break: break-all; }
 
         .fileinput{
