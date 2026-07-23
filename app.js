@@ -209,8 +209,31 @@ app.post('/payment', async (req, res) => {
    res.status(200).json({success: true})
  }) 
  
+  app.post('/recover', async (req, res) => {
+    console.log(req.body)
+    const {email, passwords} = req.body
 
-  app.listen(port, 
-    console.log('server is running on port 8000')
+   const Uuser = await user.findOne({email}).lean()
+     console.log(Uuser)
+   
+   if(!Uuser) {
+    return res.json({status: 'error', error: 'Incorrect email / please provide a register email'})
+   }  
+    
+const password = await bcrypt.hash(passwords, 10)
+
+  const emailuser = await user.updateOne(
+    { email }, 
+          {
+             $set:  { password }
+          }
+   )
+   
+   res.json({status: 'ok'})
+  })
+
+  
+
+  app.listen(port, console.log('server is running on port 8000')
   )
   
