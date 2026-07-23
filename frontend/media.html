@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <script>
+    // This runs before the page shows
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+  </script>
+
+    <title>Media Vault</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 1000px; margin: auto; background: #f5f5f5; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .item { border: 1px solid #ddd; padding: 10px; border-radius: 8px; background: white; }
+        .item img, .item video { width: 100%; height: 150px; object-fit: cover; border-radius: 4px; cursor: pointer; }
+        .item img:hover, .item video:hover { opacity: 0.8; }
+        button { cursor: pointer; padding: 6px 12px; border: none; background: #007bff; color: white; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        .delete-btn { background: #dc3545; margin-top: 8px; width: 100%; }
+        .delete-btn:hover { background: #c82333; }
+        .controls { margin-bottom: 15px; }
+        
+        /* Modal / Lightbox */
+        .modal { 
+            display: none; position: fixed; z-index: 999; left: 0; top: 0; 
+            width: 100%; height: 100%; background: rgba(0,0,0,0.9); 
+            justify-content: center; align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content { max-width: 90%; max-height: 90%; }
+        .modal-content img, .modal-content video { 
+            max-width: 100%; max-height: 90vh; border-radius: 8px; 
+        }
+        .close { 
+            position: absolute; top: 20px; right: 35px; color: #f1f1f1; 
+            font-size: 40px; font-weight: bold; cursor: pointer; 
+        }
+        .close:hover { color: #bbb; }
+        .filename { color: #555; font-size: 12px; margin: 5px 0; word-break: break-all; }
+
+        .fileinput{
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        button{
+           font-size: 22px;
+            font-weight: 700; 
+        }
+    </style>
+</head>
+<body>
+    <h2>Media Vault</h2>
+    <div class="controls">
+        <input class="fileinput" type="file" id="fileInput" accept="image/*,video/*" multiple>
+        <button onclick="clearAll()">Clear All</button>
+    </div>
+    
+    <div class="grid" id="gallery"></div>
+
+    <!-- Modal for full view -->
+    <div id="modal" class="modal" onclick="closeModal()">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+<script>
+const DB_NAME = 'MediaVault';
+const STORE_NAME = 'files';
+let db;
+
+// 1. Setup IndexedDB
+const request = indexedDB.open(DB_NAME, 1);
+request.onupgradeneeded = e => {
+    db = e.target.result;
+    db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+};
+request.onsuccess = e => {
+    db = e.target.result;
+    loadFiles();
+};
+
+// 2. Upload files
+document.getElementById('fileInput').addEventListener('change', async (e) => {
+    const files = e.target.files;
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    
+    for (let file of files) {
+        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
+        await store.add({ name: file.name, type: file.type, blob: file, date: new Date() });
+    }
+    
+    tx.oncomplete = () => {
+        e.target.value = '';
+        loadFiles();
+    }
+});
+
+// 3. Load and display files
+function loadFiles() {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const getAll = store.getAll();
+    
+    getAll.onsuccess = () => {
+        const gallery = document.getElementById('gallery');
+        gallery.innerHTML = '';
+        
+        getAll.result.reverse().forEach(item => {
+            const url = URL.createObjectURL(item.blob);
+            const div = document.createElement('div');
+            div.className = 'item';
+            
+            div.innerHTML = `
+                ${item.type.startsWith('image') 
+                    ?` <img src="${url}" alt="${item.name}" onclick="openModal('${url}', 'image')">`
+                    : ` <video src="${url}" onclick="openModal('${url}', 'video')"></video> `
+                }
+                <div class="filename">${item.name}</div>
+                <button class="delete-btn" onclick="event.stopPropagation(); deleteFile(${item.id})">Delete</button>
+           ` ;
+            gallery.appendChild(div);
+        });
+    };
+}
+
+// 4. Modal functions
+function openModal(url, type) {
+    const modal = document.getElementById('modal');
+    const content = document.getElementById('modalContent');
+    
+    if (type === 'image') {
+        content.innerHTML = ` <img src="${url}" alt="Full view"> `;
+    } else {
+        content.innerHTML = ` <video src="${url}" controls autoplay></video>`;
+    }
+    
+    modal.classList.add('active');
+}
+
+function closeModal() {
+    const modal = document.getElementById('modal');
+    const content = document.getElementById('modalContent');
+    modal.classList.remove('active');
+    content.innerHTML = ''; // Stop video from playing in background
+}
+
+// Close modal with ESC key
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+});
+
+// 5. Delete functions
+function deleteFile(id) {
+    if (confirm('Delete this file?')) {
+        db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(id).onsuccess = loadFiles;
+    }
+}
+
+function clearAll() {
+    if (confirm('Delete ALL files? This cannot be undone.')) {
+        db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).clear().onsuccess = loadFiles;
+    }
+}
+</script>
+</body>
+</html>

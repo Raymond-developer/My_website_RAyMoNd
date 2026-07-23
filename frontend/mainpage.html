@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 
-    <script>
+  <script>
     // This runs before the page shows
     const token = localStorage.getItem('token');
 
@@ -11,7 +11,7 @@
       window.location.replace('/login.html');
     }
   </script>
-
+   
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
@@ -113,10 +113,6 @@ button:hover{
     width: 100%;
   }
 
-  .Calculator{
-    margin-top: 30px;
-  }
-
   .game, .quiz, .Calculator, .todo, .expense, .product{
     margin-left: 40px;
   }
@@ -148,7 +144,7 @@ button:hover{
 }
 
 .Note {
-  margin-left: 110px;
+  margin-left: 30px;
   
 }
   </style>
@@ -167,7 +163,10 @@ button:hover{
    <h2 class="test"></h2> 
 
   <div class="grid">
-    <button class="Note"> Note </button> 
+   <span><button class="Note"> Note </button> <span>
+    <button class="Media"> Save image/video </button>
+   </span> </span>  
+
    <span> <button class="Calculator"> Calculator </button> 
   <span>  <button class="expense"> Expense </button> </span> </span>
    
@@ -217,7 +216,7 @@ button:hover{
                      const game = document.querySelector('.game')
                       const logout = document.querySelector('.logout')
     const Note = document.querySelector('.Note')                  
-
+    const Media = document.querySelector('.Media') 
       
      
 
@@ -225,6 +224,10 @@ button:hover{
       window.location.href="calculate.html"
    })  
      
+   Media.addEventListener('click', () => {
+      window.location.href="Media.html"
+   })  
+
    Note.addEventListener('click', () => {
       window.location.href="note.html"
    })
