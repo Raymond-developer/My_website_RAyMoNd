@@ -1,60 +1,160 @@
 <!DOCTYPE html>
 <html>
 <head>
-    
+      
      <script>
-    // This runs before the page shows
-    const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token');
 
     if (!token) {
       // Not logged in? Kick out immediately
       window.location.replace('/login.html');
-    } 
-  </script>
+    }
+   </script> 
+  
     
     <title>Media Vault</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 1000px; margin: auto; background: #f5f5f5; }
-
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-top: 20px; }
-
-        .item { width: 310px; border: 1px solid #ddd; padding: 10px; border-radius: 8px; background: white; }
-
-        .item img, .item video { width: 100%; height: 290px; object-fit: cover; border-radius: 4px; cursor: pointer; }
-
-        .item img:hover, .item video:hover { opacity: 0.8; }
-
-        button { cursor: pointer; padding: 6px 12px; border: none; background: #007bff; color: white; border-radius: 4px; }
-
-        button:hover { background: #0056b3; }
-
-        .delete-btn { background: #dc3545; margin-top: 8px; width: 100%; }
-
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            padding: 15px; 
+            margin: 0; 
+            background: #f5f5f5; 
+        }
+        
+        h2 { 
+            font-size: 28px; 
+            font-weight: 800; 
+            margin: 10px 0 20px 0; 
+            text-align: center;
+        }
+        
+        .controls { 
+            margin-bottom: 15px; 
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        input[type="file"] {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .clear-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        /* 3 columns on phone, auto on desktop */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; 
+        }
+        
+        @media (min-width: 768px) {
+            .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+            body { padding: 20px; max-width: 1200px; margin: auto; }
+        }
+        
+        .item { 
+            background: white; 
+            border-radius: 8px; 
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .item img, .item video { 
+            width: 100%; 
+            aspect-ratio: 1/1; 
+            object-fit: cover; 
+            display: block;
+            cursor: pointer; 
+        }
+        
+        .item img:hover, .item video:hover { opacity: 0.85; }
+        
+        .filename { 
+            color: #555; 
+            font-size: 10px; 
+            padding: 4px 6px; 
+            word-break: break-all;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .delete-btn { 
+            background: #dc3545; 
+            color: white;
+            border: none;
+            width: 100%; 
+            padding: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
         .delete-btn:hover { background: #c82333; }
-
-        .controls { margin-bottom: 15px; }
         
         /* Modal / Lightbox */
         .modal { 
             display: none; position: fixed; z-index: 999; left: 0; top: 0; 
-            width: 100%; height: 100%; background: rgba(0,0,0,0.9); 
+            width: 100%; height: 100%; background: rgba(0,0,0,0.95); 
             justify-content: center; align-items: center;
         }
         .modal.active { display: flex; }
-
-        .modal-content { max-width: 90%; max-height: 90%; }
-
+        
+        .modal-content { 
+            max-width: 95%; 
+            max-height: 95%; 
+            position: relative;
+        }
+        
         .modal-content img, .modal-content video { 
-            max-width: 100%; max-height: 90vh; border-radius: 8px; 
+            max-width: 100%; 
+            max-height: 90vh; 
+            border-radius: 8px; 
         }
-
+        
         .close { 
-            position: absolute; top: 20px; right: 35px; color: #f1f1f1; 
-            font-size: 40px; font-weight: bold; cursor: pointer; 
+            position: absolute; top: 15px; right: 20px; color: #fff; 
+            font-size: 35px; font-weight: bold; cursor: pointer; 
+            z-index: 1000;
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
         }
-        .close:hover { color: #bbb; }
-
-        .filename { color: #555; font-size: 12px; margin: 5px 0; word-break: break-all; }
+        
+        .video-wrapper { 
+            position: relative; 
+            display: inline-block; 
+        }
+        
+        .fs-btn {
+            position: absolute;
+            bottom: 60px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 18px;
+            z-index: 10;
+        }
+        
+        video:fullscreen { 
+            width: 100vw; 
+            height: 100vh; 
+            object-fit: contain;
+            }
+        video:-webkit-full-screen { 
+            width: 100vw; 
+            height: 100vh; 
+            object-fit: contain;
+        }
 
         .fileinput{
             font-size: 37px;
@@ -63,24 +163,13 @@
             margin-right: -40px;
         }
 
-        button{
-           font-size: 35px;
-            font-weight: 700; 
-        }
-
-        h2{
-            font-size: 40px;
-            font-weight: 700;
-            margin-left: 110px;
-            margin-right: -40px; 
-        }
     </style>
 </head>
 <body>
     <h2>Media Vault</h2>
     <div class="controls">
-        <input class="fileinput" type="file" id="fileInput" accept="image/*,video/*" multiple>
-        <button onclick="clearAll()">Clear All</button>
+        <input type="file" id="fileInput" accept="image/*,video/*" multiple>
+        <button class="clear-btn" onclick="clearAll()">Clear All</button>
     </div>
     
     <div class="grid" id="gallery"></div>
@@ -141,18 +230,18 @@ function loadFiles() {
             
             div.innerHTML = `
                 ${item.type.startsWith('image') 
-                    ?` <img src="${url}" alt="${item.name}" onclick="openModal('${url}', 'image')">`
+                    ? ` <img src="${url}" alt="${item.name}" onclick="openModal('${url}', 'image')"> ` 
                     : ` <video src="${url}" onclick="openModal('${url}', 'video')"></video> `
                 }
                 <div class="filename">${item.name}</div>
                 <button class="delete-btn" onclick="event.stopPropagation(); deleteFile(${item.id})">Delete</button>
-           ` ;
+            `;
             gallery.appendChild(div);
         });
     };
 }
 
-// 4. Modal functions
+// 4. Modal functions with fullscreen
 function openModal(url, type) {
     const modal = document.getElementById('modal');
     const content = document.getElementById('modalContent');
@@ -160,24 +249,38 @@ function openModal(url, type) {
     if (type === 'image') {
         content.innerHTML = ` <img src="${url}" alt="Full view"> `;
     } else {
-        content.innerHTML = ` <video src="${url}" controls autoplay></video>`;
+        content.innerHTML = `
+            <div class="video-wrapper">
+                <video id="modalVideo" src="${url}" controls autoplay></video>
+                <button class="fs-btn" onclick="event.stopPropagation(); toggleFullscreen()">⛶</button>
+            </div>
+        `;
     }
     
     modal.classList.add('active');
 }
 
+function toggleFullscreen() {
+    const video = document.getElementById('modalVideo');
+    if (!document.fullscreenElement) {
+        video.requestFullscreen?.() || video.webkitRequestFullscreen?.();
+    } else {
+        document.exitFullscreen?.();
+    }
+}
+
 function closeModal() {
+    if (document.fullscreenElement) document.exitFullscreen();
     const modal = document.getElementById('modal');
     const content = document.getElementById('modalContent');
     modal.classList.remove('active');
-    content.innerHTML = ''; // Stop video from playing in background
+    content.innerHTML = ''; // Stops video
 }
 
 // Close modal with ESC key
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeModal();
 });
-
 // 5. Delete functions
 function deleteFile(id) {
     if (confirm('Delete this file?')) {
