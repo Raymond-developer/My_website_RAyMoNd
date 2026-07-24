@@ -1,101 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+   <script>
+  const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+   </script> 
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Wave Defender V2</title>
+<title>Wave Defender V4</title>
 <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
   background: #111;
-  margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
   font-family: Arial, sans-serif;
   color: #fff;
+  height: 100vh;
   overflow: hidden;
+}
+
+h1 {
+  font-size: clamp(16px, 4vw, 28px);
+  padding: 8px 0;
+  text-align: center;
 }
 
 #hud {
   display: flex;
-  gap: 15px;
-  margin-bottom: 10px;
-  font-size: 16px;
+  gap: 6px;
+  padding: 5px;
+  font-size: clamp(12px, 3vw, 18px);
   font-weight: bold;
-  flex-wrap: wrap;
+  width: 80%; /* PHONE DEFAULT */
+  max-width: 800px;
   justify-content: center;
 }
-.hudBox { background: #222; padding: 8px 12px; border-radius: 8px; }
-.healthBar { width: 100px; height: 12px; background: #444; border-radius: 6px; overflow: hidden; }
+.hudBox {
+  background: #222;
+  padding: 6px;
+  border-radius: 6px;
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+}
+.healthBar {
+  width: 100%;
+  height: 8px;
+  background: #444;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 3px;
+}
 .healthFill { height: 100%; background: #2ecc71; transition: width 0.2s; }
 
 #game {
   background: #1a1a1a;
-  border: 3px solid #555;
-  cursor: crosshair;
+  border: 2px solid #555;
+  width: 80%; /* PHONE DEFAULT */
+  max-width: 700px;
+  aspect-ratio: 7 / 5;
   touch-action: none;
 }
 
 #mobileControls {
-  display: grid;
-  grid-template-columns: 60px 60px 60px;
-  grid-template-rows: 60px 60px;
+  display: grid; /* CHANGED: ALWAYS SHOW */
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-top: 10px;
+  padding: 10px;
+  width: 80%; /* PHONE DEFAULT */
+  max-width: 500px;
 }
 .btn {
   background: #3498db;
   color: #fff;
   border: none;
-  font-size: 22px;
-  border-radius: 10px;
+  font-size: clamp(20px, 6vw, 30px);
+  padding: 15px 0;
+  border-radius: 12px;
   cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
-.btn:active { background: #2980b9; }
-#upBtn { grid-column: 2; grid-row: 1; }
-#leftBtn { grid-column: 1; grid-row: 2; }
-#downBtn { grid-column: 2; grid-row: 2; }
-#rightBtn { grid-column: 3; grid-row: 2; }
-#shootBtn {
+.btn:active { background: #2980b9; transform: scale(0.92); }
+#up { grid-column: 2; }
+#left { grid-column: 1; }
+#down { grid-column: 2; }
+#right { grid-column: 3; }
+#shoot {
   background: #e74c3c;
   grid-column: 1 / 4;
-  grid-row: 3;
-  padding: 12px;
-  font-size: 18px;
+  font-size: clamp(16px, 5vw, 24px);
+  font-weight: bold;
 }
 #restart {
   background: #e74c3c;
   padding: 12px 25px;
-  margin-top: 10px;
   border: none;
   border-radius: 8px;
   color: #fff;
   font-size: 16px;
   display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+/* TABLET + LAPTOP: 50% WIDTH */
+@media (min-width: 768px) {
+  #hud, #game, #mobileControls {
+    width: 50%; /* LAPTOP 50% */
+  }
+ .btn {
+    padding: 10px 0; /* smaller buttons on desktop */
+    font-size: clamp(16px, 3vw, 24px);
+  }
 }
 </style>
 </head>
 <body>
 
-<h1>🔫 WAVE DEFENDER V2</h1>
+<h1>🔫 WAVE DEFENDER V4</h1>
 
 <div id="hud">
-  <div class="hudBox">HEALTH <div class="healthBar"><div id="health" class="healthFill" style="width:100%"></div></div></div>
+  <div class="hudBox">HEALTH<div class="healthBar"><div id="health" class="healthFill" style="width:100%"></div></div></div>
   <div class="hudBox">WAVE: <span id="wave">1</span></div>
   <div class="hudBox">KILLS: <span id="kills">0</span></div>
   <div class="hudBox">SPEED: <span id="speed">1.0x</span></div>
 </div>
 
-<canvas id="game" width="700" height="500"></canvas>
+<canvas id="game"></canvas>
 
 <div id="mobileControls">
-  <button class="btn" id="upBtn">▲</button>
-  <button class="btn" id="leftBtn">◀</button>
-  <button class="btn" id="downBtn">▼</button>
-  <button class="btn" id="rightBtn">▶</button>
-  <button class="btn" id="shootBtn">FIRE 🔫</button>
+  <button class="btn" id="up">▲</button>
+  <button class="btn" id="left">◀</button>
+  <button class="btn" id="down">▼</button>
+  <button class="btn" id="right">▶</button>
+  <button class="btn" id="shoot">FIRE 🔫</button>
 </div>
 
 <button id="restart" onclick="start()">PLAY AGAIN</button>
@@ -104,12 +156,15 @@ body {
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
+canvas.width = 700;
+canvas.height = 500;
+
 let player, bullets = [], enemyBullets = [], enemies = [];
 let wave = 1, kills = 0, gameOver = false, gameSpeed = 1;
 let keys = {up: false, down: false, left: false, right: false};
 
 function start() {
-  player = {x: 350, y: 400, w: 30, h: 30, health: 100, baseSpeed: 5};
+  player = {x: 335, y: 440, w: 30, h: 30, health: 100, baseSpeed: 5};
   bullets = [];
   enemyBullets = [];
   enemies = [];
@@ -124,11 +179,11 @@ function start() {
 
 function spawnWave() {
   enemies = [];
-  let enemyCount = 2 + wave + Math.floor(kills/10); // more enemies as you kill
+  let enemyCount = 2 + wave + Math.floor(kills/10);
   for(let i=0; i<enemyCount; i++) {
     enemies.push({
       x: Math.random() * (canvas.width - 30),
-      y: 50 + Math.random() * 80,
+      y: 20 + Math.random() * 60,
       w: 30, h: 30,
       health: 20 + wave * 5,
       shootTimer: Math.random() * 100,
@@ -146,26 +201,21 @@ function loop() {
 }
 
 function update() {
-  // Player movement 4 directions
   if(keys.left) player.x -= player.baseSpeed * gameSpeed;
   if(keys.right) player.x += player.baseSpeed * gameSpeed;
   if(keys.up) player.y -= player.baseSpeed * gameSpeed;
   if(keys.down) player.y += player.baseSpeed * gameSpeed;
 
-  // Keep player in bounds
   player.x = Math.max(0, Math.min(canvas.width - player.w, player.x));
-  player.y = Math.max(350, Math.min(canvas.height - player.h, player.y)); // can't go too high
-  // Update bullets
+  player.y = Math.max(canvas.height/2, Math.min(canvas.height - player.h, player.y));
+
   bullets.forEach(b => b.y -= 10 * gameSpeed);
   enemyBullets.forEach(b => b.y += 5 * gameSpeed);
   bullets = bullets.filter(b => b.y > 0);
   enemyBullets = enemyBullets.filter(b => b.y < canvas.height);
 
-  // Update enemies
   enemies.forEach(e => {
     e.y += e.speed * 0.4;
-
-    // enemy shooting - faster each kill
     e.shootTimer++;
     if(e.shootTimer > (80 - kills*2)) {
       enemyBullets.push({x: e.x + e.w/2, y: e.y + e.h});
@@ -173,7 +223,6 @@ function update() {
     }
   });
 
-  // Player bullets hit enemies
   for(let bi = bullets.length-1; bi >= 0; bi--) {
     let b = bullets[bi];
     for(let ei = enemies.length-1; ei >= 0; ei--) {
@@ -184,7 +233,7 @@ function update() {
         if(e.health <= 0) {
           enemies.splice(ei,1);
           kills++;
-          gameSpeed = 1 + kills * 0.05; // gets 5% faster per kill
+          gameSpeed = 1 + kills * 0.05;
           document.getElementById('kills').innerText = kills;
           document.getElementById('speed').innerText = gameSpeed.toFixed(1) + 'x';
         }
@@ -193,7 +242,6 @@ function update() {
     }
   }
 
-  // Enemy bullets hit player
   for(let i = enemyBullets.length-1; i >= 0; i--) {
     let b = enemyBullets[i];
     if(b.x > player.x && b.x < player.x + player.w && b.y > player.y && b.y < player.y + player.h) {
@@ -206,7 +254,6 @@ function update() {
     }
   }
 
-  // Enemy reaches player area
   enemies.forEach(e => {
     if(e.y + e.h > player.y) {
       player.health -= 15;
@@ -214,7 +261,6 @@ function update() {
     }
   });
 
-  // Next wave
   if(enemies.length === 0) {
     wave++;
     setTimeout(spawnWave, 1200);
@@ -227,19 +273,16 @@ function draw() {
   ctx.fillStyle = '#1a1a1a';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Player
   ctx.fillStyle = '#3498db';
   ctx.fillRect(player.x, player.y, player.w, player.h);
-  ctx.fillRect(player.x + 12, player.y - 8, 6, 8); // gun
+  ctx.fillRect(player.x + 12, player.y - 8, 6, 8);
 
-  // Enemies
   ctx.fillStyle = '#e74c3c';
   enemies.forEach(e => {
     ctx.fillRect(e.x, e.y, e.w, e.h);
-    ctx.fillRect(e.x + 12, e.y + e.h, 6, 8); // gun
+    ctx.fillRect(e.x + 12, e.y + e.h, 6, 8);
   });
 
-  // Bullets
   ctx.fillStyle = '#f1c40f';
   bullets.forEach(b => ctx.fillRect(b.x-2, b.y, 4, 8));
   ctx.fillStyle = '#ff0000';
@@ -251,7 +294,7 @@ function shoot() {
   bullets.push({x: player.x + player.w/2, y: player.y});
 }
 
-// Keyboard controls WASD + Arrows + Space
+// KEYBOARD FOR PC/LAPTOP
 document.addEventListener('keydown', e => {
   if(e.key === 'a' || e.key === 'ArrowLeft') keys.left = true;
   if(e.key === 'd' || e.key === 'ArrowRight') keys.right = true;
@@ -266,15 +309,24 @@ document.addEventListener('keyup', e => {
   if(e.key === 's' || e.key === 'ArrowDown') keys.down = false;
 });
 
-// Mobile buttons
-['upBtn','downBtn','leftBtn','rightBtn'].forEach(id => {
-  document.getElementById(id).ontouchstart = () => keys[id.replace('Btn','')] = true;
-  document.getElementById(id).ontouchend = () => keys[id.replace('Btn','')] = false;
-  document.getElementById(id).onmousedown = () => keys[id.replace('Btn','')] = true;
-  document.getElementById(id).onmouseup = () => keys[id.replace('Btn','')] = false;
+// MOBILE + DESKTOP BUTTONS - WORKING
+function setKey(dir, state, e) {
+  if(e) e.preventDefault();
+  keys[dir] = state;
+}
+['up','down','left','right'].forEach(dir => {
+  const btn = document.getElementById(dir);
+  btn.addEventListener('touchstart', e => setKey(dir, true, e), {passive: false});
+  btn.addEventListener('touchend', e => setKey(dir, false, e), {passive: false});
+  btn.addEventListener('mousedown', () => setKey(dir, true));
+  btn.addEventListener('mouseup', () => setKey(dir, false));
+  btn.addEventListener('mouseleave', () => setKey(dir, false));
 });
-document.getElementById('shootBtn').onclick = shoot;
-canvas.onclick = shoot;
+
+const shootBtn = document.getElementById('shoot');
+shootBtn.addEventListener('touchstart', e => { e.preventDefault(); shoot(); }, {passive: false});
+shootBtn.addEventListener('click', shoot);
+canvas.addEventListener('click', shoot);
 
 start();
 </script>
