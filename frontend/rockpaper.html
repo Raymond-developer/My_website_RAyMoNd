@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ 
+   <script>
+    // This runs before the page shows
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+  </script>
+   
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rock Paper Scissors</title>
+<style>
+* { box-sizing: border-box; font-family: 'Arial', sans-serif; }
+body {
+  background: #1a1a2e;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+h1 { color: #e94560; margin-bottom: 10px; }
+
+#scoreBoard {
+  display: flex;
+  gap: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  background: #16213e;
+  padding: 10px 20px;
+  border-radius: 10px;
+}
+#scoreBoard span { color: #0f3460; background: #fff; padding: 2px 8px; border-radius: 5px; }
+
+#choices {
+  display: flex;
+  gap: 15px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.choiceBtn {
+  background: #0f3460;
+  border: 3px solid transparent;
+  border-radius: 15px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 110px;
+}
+.choiceBtn:hover { transform: scale(1.1); border-color: #e94560; }
+.choiceBtn img { width: 80px; height: 80px; object-fit: contain; }
+.choiceBtn p { margin: 5px 0 0 0; font-weight: bold; }
+
+#resultArea {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+.playerBox {
+  text-align: center;
+}
+.playerBox img {
+  width: 120px;
+  height: 120px;
+  background: #16213e;
+  border-radius: 15px;
+  padding: 10px;
+  border: 3px solid #0f3460;
+}
+
+#resultText {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 15px 0;
+  min-height: 35px;
+  color: #ffd700;
+}
+
+#resetBtn {
+  background: #e94560;
+  color: #fff;
+  border: none;
+  padding: 12px 25px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+#resetBtn:hover { background: #ff6b81; }
+
+@media (max-width: 500px) {
+ .choiceBtn { width: 90px; }
+ .choiceBtn img { width: 60px; height: 60px; }
+ .playerBox img { width: 90px; height: 90px; }
+}
+</style>
+</head>
+<body>
+
+<h1>ROCK PAPER SCISSORS</h1>
+
+<div id="scoreBoard">
+  <div>YOU: <span id="playerScore">0</span></div>
+  <div>COM: <span id="computerScore">0</span></div>
+  <div>DRAWS: <span id="draws">0</span></div>
+</div>
+
+<div id="resultText">Pick one to start!</div>
+
+<div id="resultArea">
+  <div class="playerBox">
+    <h3>YOU</h3>
+    <img id="playerChoiceImg" src="https://cdn-icons-png.flaticon.com/512/2434/2434190.png" alt="Your choice">
+  </div>
+  <div class="playerBox">
+    <h3>COMPUTER</h3>
+    <img id="computerChoiceImg" src="https://cdn-icons-png.flaticon.com/512/2434/2434190.png" alt="Computer choice">
+  </div>
+</div>
+
+<div id="choices">
+  <div class="choiceBtn" onclick="play('rock')">
+    <img src="https://cdn-icons-png.flaticon.com/512/2434/2434190.png" alt="Rock">
+    <p>ROCK</p>
+  </div>
+  <div class="choiceBtn" onclick="play('paper')">
+    <img src="https://cdn-icons-png.flaticon.com/512/2434/2434189.png" alt="Paper">
+    <p>PAPER</p>
+  </div>
+  <div class="choiceBtn" onclick="play('scissors')">
+    <img src="https://cdn-icons-png.flaticon.com/512/2434/2434191.png" alt="Scissors">
+    <p>SCISSORS</p>
+  </div>
+</div>
+
+<button id="resetBtn" onclick="resetScore()">RESET SCORE</button>
+
+<script>
+let playerScore = 0;
+let computerScore = 0;
+let draws = 0;
+
+const images = {
+  rock: "https://cdn-icons-png.flaticon.com/512/2434/2434190.png",
+  paper: "https://cdn-icons-png.flaticon.com/512/2434/2434189.png",
+  scissors: "https://cdn-icons-png.flaticon.com/512/2434/2434191.png",
+  none: "https://cdn-icons-png.flaticon.com/512/2434/2434190.png"
+};
+
+const choices = ['rock', 'paper', 'scissors'];
+
+function play(playerChoice) {
+  let computerChoice = choices[Math.floor(Math.random() * 3)];
+  
+  // Show images
+  document.getElementById('playerChoiceImg').src = images[playerChoice];
+  document.getElementById('computerChoiceImg').src = images[computerChoice];
+  
+  let result = '';
+  
+  if(playerChoice === computerChoice) {
+    result = "IT'S A DRAW!";
+    draws++;
+  } else if(
+    (playerChoice === 'rock' && computerChoice === 'scissors') ||
+    (playerChoice === 'paper' && computerChoice === 'rock') ||
+    (playerChoice === 'scissors' && computerChoice === 'paper')
+  ) {
+    result = "YOU WIN! 🎉";
+    playerScore++;
+  } else {
+    result = "YOU LOSE! 😢";
+    computerScore++;
+  }
+  
+  document.getElementById('resultText').innerText = result;
+  updateScore();
+}
+
+function updateScore() {
+  document.getElementById('playerScore').innerText = playerScore;
+  document.getElementById('computerScore').innerText = computerScore;
+  document.getElementById('draws').innerText = draws;
+}
+
+function resetScore() {
+  playerScore = 0;
+  computerScore = 0;
+  draws = 0;
+  updateScore();
+  document.getElementById('resultText').innerText = "Pick one to start!";
+  document.getElementById('playerChoiceImg').src = images.none;
+  document.getElementById('computerChoiceImg').src = images.none;
+}
+
+// Keyboard support
+document.addEventListener('keydown', e => {
+  if(e.key === 'r') play('rock');
+  if(e.key === 'p') play('paper');
+  if(e.key === 's') play('scissors');
+});
+</script>
+
+</body>
+</html>

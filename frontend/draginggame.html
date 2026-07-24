@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <script>
+    // This runs before the page shows
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+  </script>
+   
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Block Arranging Game</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    background: #0f172a;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+  }
+  h1 { margin: 0; }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 10px;
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 12px;
+  }
+  .slot {
+    width: 100px;
+    height: 100px;
+    border: 3px dashed #475569;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .slot.hover { background: #334155; }
+  #palette {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .block {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    cursor: grab;
+    touch-action: none;
+  }
+  .block:active { cursor: grabbing; }
+  #msg { font-weight: 600; font-size: 18px; }
+  button {
+    background: #22c55e;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: #16a34a; }
+</style>
+</head>
+<body>
+  <h1>Block Arranging Game</h1>
+  <p>Drag each block to its matching outline</p>
+
+  <div id="board"></div>
+  <div id="palette"></div>
+  <div id="msg"></div>
+  <button id="reset">Shuffle & Reset</button>
+
+<script>
+const colors = ['#ef4444','#22c55e','#3b82f6','#f59e0b','#a855f7','#ec4899','#14b8a6','#eab308','#6366f1'];
+const board = document.getElementById('board');
+const palette = document.getElementById('palette');
+const msg = document.getElementById('msg');
+
+let dragged = null;
+
+function createGame() {
+  board.innerHTML = '';
+  palette.innerHTML = '';
+  msg.textContent = '';
+
+  // shuffle colors for blocks
+  const shuffled = [...colors].sort(() => Math.random() - 0.5);
+
+  // create slots
+  colors.forEach((color, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    slot.dataset.color = color;
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('hover'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('hover'));
+    slot.addEventListener('drop', handleDrop);
+    board.appendChild(slot);
+  });
+
+  // create draggable blocks
+  shuffled.forEach(color => {
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.style.background = color;
+    block.draggable = true;
+    block.dataset.color = color;
+    block.addEventListener('dragstart', e => { dragged = block; });
+    block.addEventListener('dragend', () => { dragged = null; });
+    palette.appendChild(block);
+  });
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  const slot = e.currentTarget;
+  slot.classList.remove('hover');
+  if (!dragged) return;
+  
+  if (slot.dataset.color === dragged.dataset.color && !slot.firstChild) {
+    slot.appendChild(dragged);
+    dragged.draggable = false;
+    checkWin();
+  } else {
+    msg.textContent = "Wrong spot! Try again.";
+    setTimeout(() => msg.textContent = '', 1000);
+  }
+}
+
+function checkWin() {
+  const slots = [...board.children];
+  const won = slots.every(slot => slot.firstChild && slot.firstChild.dataset.color === slot.dataset.color);
+  if (won) msg.textContent = "🎉 You did it! All blocks arranged!";
+}
+
+document.getElementById('reset').addEventListener('click', createGame);
+createGame();
+</script>
+</body>
+</html>

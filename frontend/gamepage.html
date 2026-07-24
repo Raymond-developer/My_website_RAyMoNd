@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- 
-   <script>
+
+     <script>
     // This runs before the page shows
     const token = localStorage.getItem('token');
 
@@ -12,7 +12,6 @@
     }
   </script>
    
-    
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
@@ -20,7 +19,7 @@
   <style>
     
    body {
-  background-image: url("photo_2026-07-04_21-32-33.jpg");
+  background-image: url("photo_2026-07-04_21-34-15.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -146,7 +145,7 @@ button:hover{
 
 .Note {
   margin-left: 30px;
-  
+   margin-top: 200px;
 }
 
 .Media{
@@ -156,62 +155,22 @@ button:hover{
 </head>
 <body>
 
-  <div class="move">
-  <h1 class="h1"> Welcome </h1>
-   <h2 class="count"> 1 </h2>
-  <h1> Author: RAyMoNd</h1>
-  </div>
     
-    <div> <button class="logout"> Log out </button> </div>
-   <div> <button class="changep"> Change password </button> </div>
-
-   <h2 class="test"></h2> 
+    <div> <button class="logout"> Back </button> </div>
 
   <div class="grid">
-   <span><button class="Note"> Note </button> <span>
-    <button class="Media"> Save image/video </button>
+   <span><button class="Note"> Brick </button> <span>
+    <button class="Media"> Drag </button>
    </span> </span>  
 
-   <span> <button class="Calculator"> Calculator </button> 
-  <span>  <button class="expense"> Expense </button> </span> </span>
+   <span> <button class="Calculator"> Rock Paper Scissor </button> 
+  <span>  <button class="expense"> Snake </button> </span> </span>
    
-   <div> <button class="quiz"> Quiz </button>  
-   <span> <button class="todo"> Todo </button> </span> </div>
-   
-    <div> <button class="game"> games </button> 
-    <span> <button class="product"> Product </button> </span>  </div>
-    
   </div>
 
   <script>
 
 
-     const Autoken = localStorage.getItem('token');
-
-    if (Autoken) {
-      setTimeout(() => {
-       const name = document.querySelector('.test')
-       const localName = localStorage.getItem('Name')
-       name.innerHTML = ` Welcome ${localName} nice having you! `
-      }, 2000)
-
-      setTimeout(() => {
-       const name = document.querySelector('.test')
-       name.innerHTML = ` Welcome Guest `
-      }, 15000)
-       
-     
-      setTimeout(() => {
-       const name = document.querySelector('.test')
-       name.innerHTML = ''
-      }, 180000)
-    }
-       let count = 0
-    setInterval(() => {
-     const countt = document.querySelector('.count')
-     countt.innerHTML = count
-     count++
-    }, 1000 )
    const calculator = document.querySelector('.Calculator')
       const product = document.querySelector('.product')
          const quiz = document.querySelector('.quiz')
@@ -226,47 +185,27 @@ button:hover{
      
 
    calculator.addEventListener('click', () => {
-      window.location.href="calculate.html"
+      window.location.href="rockpaper.html"
    })  
      
    Media.addEventListener('click', () => {
-      window.location.href="media.html"
+      window.location.href="draginggame.html"
    })  
 
    Note.addEventListener('click', () => {
-      window.location.href="note.html"
+      window.location.href="brickgame.html"
    })
 
-   product.addEventListener('click', () => {
-    // here 
-     window.location.href="amazon.html"
-   })
-
-   quiz.addEventListener('click', () => {
-     window.location.href="quiz.html"
-   })
-
-   todo.addEventListener('click', () => {
-     window.location.href="todo.html"
-   })
-
-   changep.addEventListener('click', () => {
-     window.location.href="change.html"
-   })
-
-   game.addEventListener('click', () => {
-     window.location.href="gamepage.html"
-   })
 
 
    logout.addEventListener('click', () => {
-     window.location.href="register.html"
+     window.location.href="mainpage.html"
      localStorage.removeItem('token')
     
    })
 
    expense.addEventListener('click', () => {
-     window.location.href="expense.html"
+     window.location.href="snakegame.html"
    })
   </script>
 </body>
