@@ -1,19 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-   <script>
-  const token = localStorage.getItem('token');
-
-    if (!token) {
-      // Not logged in? Kick out immediately
-      window.location.replace('/login.html');
-    } 
-   </script> 
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Wave Defender V4</title>
+<title>Wave Defender V5</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -40,7 +30,7 @@ h1 {
   padding: 5px;
   font-size: clamp(12px, 3vw, 18px);
   font-weight: bold;
-  width: 80%; /* PHONE DEFAULT */
+  width: 80%;
   max-width: 800px;
   justify-content: center;
 }
@@ -65,18 +55,18 @@ h1 {
 #game {
   background: #1a1a1a;
   border: 2px solid #555;
-  width: 90%; /* PHONE DEFAULT */
+  width: 80%;
   max-width: 700px;
   aspect-ratio: 7 / 5;
   touch-action: none;
 }
 
 #mobileControls {
-  display: grid; /* CHANGED: ALWAYS SHOW */
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   padding: 10px;
-  width: 80%; /* PHONE DEFAULT */
+  width: 80%;
   max-width: 500px;
 }
 .btn {
@@ -120,10 +110,10 @@ h1 {
 /* TABLET + LAPTOP: 50% WIDTH */
 @media (min-width: 768px) {
   #hud, #game, #mobileControls {
-    width: 50%; /* LAPTOP 50% */
+    width: 50%;
   }
  .btn {
-    padding: 10px 0; /* smaller buttons on desktop */
+    padding: 10px 0;
     font-size: clamp(16px, 3vw, 24px);
   }
 }
@@ -131,13 +121,13 @@ h1 {
 </head>
 <body>
 
-<h1>🔫 WAVE DEFENDER V4</h1>
+<h1>🔫 WAVE DEFENDER V5</h1>
 
 <div id="hud">
   <div class="hudBox">HEALTH<div class="healthBar"><div id="health" class="healthFill" style="width:100%"></div></div></div>
   <div class="hudBox">WAVE: <span id="wave">1</span></div>
   <div class="hudBox">KILLS: <span id="kills">0</span></div>
-  <div class="hudBox">SPEED: <span id="speed">1.0x</span></div>
+  <div class="hudBox">SPEED: <span id="speed">0.5x</span></div>
 </div>
 
 <canvas id="game"></canvas>
@@ -160,8 +150,10 @@ canvas.width = 700;
 canvas.height = 500;
 
 let player, bullets = [], enemyBullets = [], enemies = [];
-let wave = 1, kills = 0, gameOver = false, gameSpeed = 1;
+let wave = 1, kills = 0, gameOver = false, gameSpeed = 0.5; // START 0.5
 let keys = {up: false, down: false, left: false, right: false};
+let enemiesToSpawn = 1; // NEW: how many to spawn this wave
+let spawning = false;
 
 function start() {
   player = {x: 335, y: 440, w: 30, h: 30, health: 100, baseSpeed: 5};
@@ -170,27 +162,43 @@ function start() {
   enemies = [];
   wave = 1;
   kills = 0;
-  gameSpeed = 1;
+  gameSpeed = 0.5; // START SLOW
+  enemiesToSpawn = 1; // START WITH 1 ENEMY
   gameOver = false;
   document.getElementById('restart').style.display = 'none';
-  spawnWave();
+  document.getElementById('speed').innerText = gameSpeed.toFixed(1) + 'x';
+  spawnEnemy(); // spawn first one
   loop();
 }
 
-function spawnWave() {
-  enemies = [];
-  let enemyCount = 2 + wave + Math.floor(kills/10);
-  for(let i=0; i<enemyCount; i++) {
-    enemies.push({
-      x: Math.random() * (canvas.width - 30),
-      y: 20 + Math.random() * 60,
-      w: 30, h: 30,
-      health: 20 + wave * 5,
-      shootTimer: Math.random() * 100,
-      speed: (1 + wave * 0.1) * gameSpeed
-    });
-  }
+function spawnEnemy() {
+  if(spawning) return;
+  spawning = true;
+  enemies.push({
+    x: Math.random() * (canvas.width - 30),
+    y: 20,
+    w: 30, h: 30,
+    health: 20 + wave * 5,
+    shootTimer: Math.random() * 100,
+    speed: (1 + wave * 0.15) * gameSpeed
+  });
+
+  setTimeout(() => { spawning = false; }, 800); // delay between spawns
+}
+
+function nextWave() {
+  wave++;
+  if(wave > 10) wave = 1; // RESET TO 1 AFTER 10
+  enemiesToSpawn = wave; // 1,2,3...10
   document.getElementById('wave').innerText = wave;
+
+  // spawn all enemies for this wave one by one
+  let count = 0;
+  const interval = setInterval(() => {
+    spawnEnemy();
+    count++;
+    if(count >= enemiesToSpawn) clearInterval(interval);
+  }, 1000); // 1 second between each enemy
 }
 
 function loop() {
@@ -217,7 +225,7 @@ function update() {
   enemies.forEach(e => {
     e.y += e.speed * 0.4;
     e.shootTimer++;
-    if(e.shootTimer > (80 - kills*2)) {
+    if(e.shootTimer > (120 - kills*2)) { // slower shooting at start
       enemyBullets.push({x: e.x + e.w/2, y: e.y + e.h});
       e.shootTimer = 0;
     }
@@ -233,7 +241,7 @@ function update() {
         if(e.health <= 0) {
           enemies.splice(ei,1);
           kills++;
-          gameSpeed = 1 + kills * 0.05;
+          gameSpeed = 0.5 + kills * 0.03; // speed increases slowly
           document.getElementById('kills').innerText = kills;
           document.getElementById('speed').innerText = gameSpeed.toFixed(1) + 'x';
         }
@@ -261,9 +269,9 @@ function update() {
     }
   });
 
-  if(enemies.length === 0) {
-    wave++;
-    setTimeout(spawnWave, 1200);
+  // WHEN ALL ENEMIES DEAD = NEXT WAVE
+  if(enemies.length === 0 &&!spawning) {
+    setTimeout(nextWave, 1500); // 1.5s pause before next wave
   }
 
   document.getElementById('health').style.width = player.health + '%';
@@ -294,7 +302,7 @@ function shoot() {
   bullets.push({x: player.x + player.w/2, y: player.y});
 }
 
-// KEYBOARD FOR PC/LAPTOP
+// KEYBOARD
 document.addEventListener('keydown', e => {
   if(e.key === 'a' || e.key === 'ArrowLeft') keys.left = true;
   if(e.key === 'd' || e.key === 'ArrowRight') keys.right = true;
@@ -309,11 +317,12 @@ document.addEventListener('keyup', e => {
   if(e.key === 's' || e.key === 'ArrowDown') keys.down = false;
 });
 
-// MOBILE + DESKTOP BUTTONS - WORKING
+// BUTTONS
 function setKey(dir, state, e) {
   if(e) e.preventDefault();
   keys[dir] = state;
 }
+
 ['up','down','left','right'].forEach(dir => {
   const btn = document.getElementById(dir);
   btn.addEventListener('touchstart', e => setKey(dir, true, e), {passive: false});
