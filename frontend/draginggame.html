@@ -69,7 +69,7 @@ h1 {
   max-width: 700px;
   aspect-ratio: 7 / 5;
   touch-action: none;
-  height: 120px;
+  height: 80px;
 }
 
 #mobileControls {
@@ -188,7 +188,7 @@ function spawnWave() {
       w: 30, h: 30,
       health: 20 + wave * 5,
       shootTimer: Math.random() * 100,
-      speed: (1 + wave * 0.3) * gameSpeed
+      speed: (1 + wave * 0.5) * gameSpeed
     });
   }
   document.getElementById('wave').innerText = wave;
