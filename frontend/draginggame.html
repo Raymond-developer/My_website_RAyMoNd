@@ -1,153 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <script>
-    // This runs before the page shows
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      // Not logged in? Kick out immediately
-      window.location.replace('/login.html');
-    }
-  </script>
-   
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Block Arranging Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Wave Defender V2</title>
 <style>
-  body {
-    font-family: system-ui, sans-serif;
-    background: #0f172a;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    padding: 20px;
-  }
-  h1 { margin: 0; }
-  #board {
-    display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
-    gap: 10px;
-    background: #1e293b;
-    padding: 15px;
-    border-radius: 12px;
-  }
-  .slot {
-    width: 100px;
-    height: 100px;
-    border: 3px dashed #475569;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-  }
-  .slot.hover { background: #334155; }
-  #palette {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .block {
-    width: 80px;
-    height: 80px;
-    border-radius: 8px;
-    cursor: grab;
-    touch-action: none;
-  }
-  .block:active { cursor: grabbing; }
-  #msg { font-weight: 600; font-size: 18px; }
-  button {
-    background: #22c55e;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  button:hover { background: #16a34a; }
+body {
+  background: #111;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  overflow: hidden;
+}
+
+#hud {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.hudBox { background: #222; padding: 8px 12px; border-radius: 8px; }
+.healthBar { width: 100px; height: 12px; background: #444; border-radius: 6px; overflow: hidden; }
+.healthFill { height: 100%; background: #2ecc71; transition: width 0.2s; }
+
+#game {
+  background: #1a1a1a;
+  border: 3px solid #555;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+#mobileControls {
+  display: grid;
+  grid-template-columns: 60px 60px 60px;
+  grid-template-rows: 60px 60px;
+  gap: 8px;
+  margin-top: 10px;
+}
+.btn {
+  background: #3498db;
+  color: #fff;
+  border: none;
+  font-size: 22px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.btn:active { background: #2980b9; }
+#upBtn { grid-column: 2; grid-row: 1; }
+#leftBtn { grid-column: 1; grid-row: 2; }
+#downBtn { grid-column: 2; grid-row: 2; }
+#rightBtn { grid-column: 3; grid-row: 2; }
+#shootBtn {
+  background: #e74c3c;
+  grid-column: 1 / 4;
+  grid-row: 3;
+  padding: 12px;
+  font-size: 18px;
+}
+#restart {
+  background: #e74c3c;
+  padding: 12px 25px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  display: none;
+}
 </style>
 </head>
 <body>
-  <h1>Block Arranging Game</h1>
-  <p>Drag each block to its matching outline</p>
 
-  <div id="board"></div>
-  <div id="palette"></div>
-  <div id="msg"></div>
-  <button id="reset">Shuffle & Reset</button>
+<h1>🔫 WAVE DEFENDER V2</h1>
+
+<div id="hud">
+  <div class="hudBox">HEALTH <div class="healthBar"><div id="health" class="healthFill" style="width:100%"></div></div></div>
+  <div class="hudBox">WAVE: <span id="wave">1</span></div>
+  <div class="hudBox">KILLS: <span id="kills">0</span></div>
+  <div class="hudBox">SPEED: <span id="speed">1.0x</span></div>
+</div>
+
+<canvas id="game" width="700" height="500"></canvas>
+
+<div id="mobileControls">
+  <button class="btn" id="upBtn">▲</button>
+  <button class="btn" id="leftBtn">◀</button>
+  <button class="btn" id="downBtn">▼</button>
+  <button class="btn" id="rightBtn">▶</button>
+  <button class="btn" id="shootBtn">FIRE 🔫</button>
+</div>
+
+<button id="restart" onclick="start()">PLAY AGAIN</button>
 
 <script>
-const colors = ['#ef4444','#22c55e','#3b82f6','#f59e0b','#a855f7','#ec4899','#14b8a6','#eab308','#6366f1'];
-const board = document.getElementById('board');
-const palette = document.getElementById('palette');
-const msg = document.getElementById('msg');
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
 
-let dragged = null;
+let player, bullets = [], enemyBullets = [], enemies = [];
+let wave = 1, kills = 0, gameOver = false, gameSpeed = 1;
+let keys = {up: false, down: false, left: false, right: false};
 
-function createGame() {
-  board.innerHTML = '';
-  palette.innerHTML = '';
-  msg.textContent = '';
-
-  // shuffle colors for blocks
-  const shuffled = [...colors].sort(() => Math.random() - 0.5);
-
-  // create slots
-  colors.forEach((color, i) => {
-    const slot = document.createElement('div');
-    slot.className = 'slot';
-    slot.dataset.color = color;
-    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('hover'); });
-    slot.addEventListener('dragleave', () => slot.classList.remove('hover'));
-    slot.addEventListener('drop', handleDrop);
-    board.appendChild(slot);
-  });
-
-  // create draggable blocks
-  shuffled.forEach(color => {
-    const block = document.createElement('div');
-    block.className = 'block';
-    block.style.background = color;
-    block.draggable = true;
-    block.dataset.color = color;
-    block.addEventListener('dragstart', e => { dragged = block; });
-    block.addEventListener('dragend', () => { dragged = null; });
-    palette.appendChild(block);
-  });
+function start() {
+  player = {x: 350, y: 400, w: 30, h: 30, health: 100, baseSpeed: 5};
+  bullets = [];
+  enemyBullets = [];
+  enemies = [];
+  wave = 1;
+  kills = 0;
+  gameSpeed = 1;
+  gameOver = false;
+  document.getElementById('restart').style.display = 'none';
+  spawnWave();
+  loop();
 }
 
-function handleDrop(e) {
-  e.preventDefault();
-  const slot = e.currentTarget;
-  slot.classList.remove('hover');
-  if (!dragged) return;
-  
-  if (slot.dataset.color === dragged.dataset.color && !slot.firstChild) {
-    slot.appendChild(dragged);
-    dragged.draggable = false;
-    checkWin();
-  } else {
-    msg.textContent = "Wrong spot! Try again.";
-    setTimeout(() => msg.textContent = '', 1000);
+function spawnWave() {
+  enemies = [];
+  let enemyCount = 2 + wave + Math.floor(kills/10); // more enemies as you kill
+  for(let i=0; i<enemyCount; i++) {
+    enemies.push({
+      x: Math.random() * (canvas.width - 30),
+      y: 50 + Math.random() * 80,
+      w: 30, h: 30,
+      health: 20 + wave * 5,
+      shootTimer: Math.random() * 100,
+      speed: (1 + wave * 0.2) * gameSpeed
+    });
   }
+  document.getElementById('wave').innerText = wave;
 }
 
-function checkWin() {
-  const slots = [...board.children];
-  const won = slots.every(slot => slot.firstChild && slot.firstChild.dataset.color === slot.dataset.color);
-  if (won) msg.textContent = "🎉 You did it! All blocks arranged!";
+function loop() {
+  if(gameOver) return;
+  update();
+  draw();
+  requestAnimationFrame(loop);
 }
 
-document.getElementById('reset').addEventListener('click', createGame);
-createGame();
+function update() {
+  // Player movement 4 directions
+  if(keys.left) player.x -= player.baseSpeed * gameSpeed;
+  if(keys.right) player.x += player.baseSpeed * gameSpeed;
+  if(keys.up) player.y -= player.baseSpeed * gameSpeed;
+  if(keys.down) player.y += player.baseSpeed * gameSpeed;
+
+  // Keep player in bounds
+  player.x = Math.max(0, Math.min(canvas.width - player.w, player.x));
+  player.y = Math.max(350, Math.min(canvas.height - player.h, player.y)); // can't go too high
+  // Update bullets
+  bullets.forEach(b => b.y -= 10 * gameSpeed);
+  enemyBullets.forEach(b => b.y += 5 * gameSpeed);
+  bullets = bullets.filter(b => b.y > 0);
+  enemyBullets = enemyBullets.filter(b => b.y < canvas.height);
+
+  // Update enemies
+  enemies.forEach(e => {
+    e.y += e.speed * 0.4;
+
+    // enemy shooting - faster each kill
+    e.shootTimer++;
+    if(e.shootTimer > (80 - kills*2)) {
+      enemyBullets.push({x: e.x + e.w/2, y: e.y + e.h});
+      e.shootTimer = 0;
+    }
+  });
+
+  // Player bullets hit enemies
+  for(let bi = bullets.length-1; bi >= 0; bi--) {
+    let b = bullets[bi];
+    for(let ei = enemies.length-1; ei >= 0; ei--) {
+      let e = enemies[ei];
+      if(b.x > e.x && b.x < e.x + e.w && b.y > e.y && b.y < e.y + e.h) {
+        e.health -= 20;
+        bullets.splice(bi,1);
+        if(e.health <= 0) {
+          enemies.splice(ei,1);
+          kills++;
+          gameSpeed = 1 + kills * 0.05; // gets 5% faster per kill
+          document.getElementById('kills').innerText = kills;
+          document.getElementById('speed').innerText = gameSpeed.toFixed(1) + 'x';
+        }
+        break;
+      }
+    }
+  }
+
+  // Enemy bullets hit player
+  for(let i = enemyBullets.length-1; i >= 0; i--) {
+    let b = enemyBullets[i];
+    if(b.x > player.x && b.x < player.x + player.w && b.y > player.y && b.y < player.y + player.h) {
+      player.health -= 5;
+      enemyBullets.splice(i,1);
+      if(player.health <= 0) {
+        gameOver = true;
+        document.getElementById('restart').style.display = 'block';
+      }
+    }
+  }
+
+  // Enemy reaches player area
+  enemies.forEach(e => {
+    if(e.y + e.h > player.y) {
+      player.health -= 15;
+      e.y = -50;
+    }
+  });
+
+  // Next wave
+  if(enemies.length === 0) {
+    wave++;
+    setTimeout(spawnWave, 1200);
+  }
+
+  document.getElementById('health').style.width = player.health + '%';
+}
+
+function draw() {
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Player
+  ctx.fillStyle = '#3498db';
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+  ctx.fillRect(player.x + 12, player.y - 8, 6, 8); // gun
+
+  // Enemies
+  ctx.fillStyle = '#e74c3c';
+  enemies.forEach(e => {
+    ctx.fillRect(e.x, e.y, e.w, e.h);
+    ctx.fillRect(e.x + 12, e.y + e.h, 6, 8); // gun
+  });
+
+  // Bullets
+  ctx.fillStyle = '#f1c40f';
+  bullets.forEach(b => ctx.fillRect(b.x-2, b.y, 4, 8));
+  ctx.fillStyle = '#ff0000';
+  enemyBullets.forEach(b => ctx.fillRect(b.x-2, b.y, 4, 8));
+}
+
+function shoot() {
+  if(gameOver) return;
+  bullets.push({x: player.x + player.w/2, y: player.y});
+}
+
+// Keyboard controls WASD + Arrows + Space
+document.addEventListener('keydown', e => {
+  if(e.key === 'a' || e.key === 'ArrowLeft') keys.left = true;
+  if(e.key === 'd' || e.key === 'ArrowRight') keys.right = true;
+  if(e.key === 'w' || e.key === 'ArrowUp') keys.up = true;
+  if(e.key === 's' || e.key === 'ArrowDown') keys.down = true;
+  if(e.key === ' ') shoot();
+});
+document.addEventListener('keyup', e => {
+  if(e.key === 'a' || e.key === 'ArrowLeft') keys.left = false;
+  if(e.key === 'd' || e.key === 'ArrowRight') keys.right = false;
+  if(e.key === 'w' || e.key === 'ArrowUp') keys.up = false;
+  if(e.key === 's' || e.key === 'ArrowDown') keys.down = false;
+});
+
+// Mobile buttons
+['upBtn','downBtn','leftBtn','rightBtn'].forEach(id => {
+  document.getElementById(id).ontouchstart = () => keys[id.replace('Btn','')] = true;
+  document.getElementById(id).ontouchend = () => keys[id.replace('Btn','')] = false;
+  document.getElementById(id).onmousedown = () => keys[id.replace('Btn','')] = true;
+  document.getElementById(id).onmouseup = () => keys[id.replace('Btn','')] = false;
+});
+document.getElementById('shootBtn').onclick = shoot;
+canvas.onclick = shoot;
+
+start();
 </script>
 </body>
 </html>

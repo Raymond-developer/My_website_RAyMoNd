@@ -8,7 +8,7 @@
     if (!token) {
       // Not logged in? Kick out immediately
       window.location.replace('/login.html');
-    }
+    } 
    </script>
 
   <meta charset="UTF-8">
@@ -23,8 +23,11 @@
 }
 
 body {
+  background-image: url('photo_2026-07-24_19-55-32.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   font-family: Roboto, Arial, sans-serif;
-  background-color: rgb(17, 17, 202);
   padding: 20px 4%;
   min-height: 100%;
   display: flex;
@@ -197,115 +200,16 @@ html, body {
   <script>
      const questions = [
   {
-    question: "What does 'HTTP' stand for?",
+    question: "Which country is known as the Land of the Rising Sun?",
     answers: [
-      { text: "HyperText Transfer Protocol", correct: true },
-      { text: "High Tech Transfer Process", correct: false },
-      { text: "Hyperlink Text Transmission", correct: false },
-      { text: "Home Tool Transfer Protocol", correct: false }
+      { text: "China", correct: false },
+      { text: "Japan", correct: true },
+      { text: "South Korea", correct: false },
+      { text: "Thailand", correct: false }
     ]
   },
   {
-    question: "Which planet is known as the Red Planet?",
-    answers: [
-      { text: "Venus", correct: false },
-      { text: "Mars", correct: true },
-      { text: "Jupiter", correct: false },
-      { text: "Saturn", correct: false }
-    ]
-  },
-  {
-    question: "What is the capital city of Japan?",
-    answers: [
-      { text: "Seoul", correct: false },
-      { text: "Beijing", correct: false },
-      { text: "Tokyo", correct: true },
-      { text: "Bangkok", correct: false }
-    ]
-  },
-  {
-    question: "Who painted the Mona Lisa?",
-    answers: [
-      { text: "Vincent van Gogh", correct: false },
-      { text: "Pablo Picasso", correct: false },
-      { text: "Leonardo da Vinci", correct: true },
-      { text: "Michelangelo", correct: false }
-    ]
-  },
-  {
-    question: "Which company created the React library?",
-    answers: [
-      { text: "Google", correct: false },
-      { text: "Microsoft", correct: false },
-      { text: "Meta", correct: true },
-      { text: "Apple", correct: false }
-    ]
-  },
-  {
-    question: "What is the largest ocean on Earth?",
-    answers: [
-      { text: "Atlantic Ocean", correct: false },
-      { text: "Indian Ocean", correct: false },
-      { text: "Pacific Ocean", correct: true },
-      { text: "Arctic Ocean", correct: false }
-    ]
-  },
-  {
-    question: "What does 'CSS' control in web development?",
-    answers: [
-      { text: "Website structure", correct: false },
-      { text: "Website styling and layout", correct: true },
-      { text: "Database queries", correct: false },
-      { text: "Server logic", correct: false }
-    ]
-  },
-  {
-    question: "Which animal is known as the King of the Jungle?",
-    answers: [
-      { text: "Elephant", correct: false },
-      { text: "Tiger", correct: false },
-      { text: "Lion", correct: true },
-      { text: "Gorilla", correct: false }
-    ]
-  },
-  {
-    question: "What year did humans first land on the Moon?",
-    answers: [
-      { text: "1965", correct: false },
-      { text: "1969", correct: true },
-      { text: "1972", correct: false },
-      { text: "1958", correct: false }
-    ]
-  },
-  {
-    question: "Which language is known as the 'language of AI'?",
-    answers: [
-      { text: "Java", correct: false },
-      { text: "Python", correct: true },
-      { text: "C++", correct: false },
-      { text: "Ruby", correct: false }
-    ]
-  },
-  {
-    question: "What does 'API' mean?",
-    answers: [
-      { text: "Application Programming Interface", correct: true },
-      { text: "Advanced Program Integration", correct: false },
-      { text: "Application Process Instruction", correct: false },
-      { text: "Automated Programming Input", correct: false }
-    ]
-  },
-  {
-    question: "Which country hosted the 2024 Summer Olympics?",
-    answers: [
-      { text: "USA", correct: false },
-      { text: "Japan", correct: false },
-      { text: "France", correct: true },
-      { text: "Brazil", correct: false }
-    ]
-  },
-  {
-    question: "How many continents are there on Earth?",
+    question: "How many continents are there in the world?",
     answers: [
       { text: "5", correct: false },
       { text: "6", correct: false },
@@ -314,24 +218,123 @@ html, body {
     ]
   },
   {
-    question: "What is the main ingredient in guacamole?",
+    question: "What is the largest ocean on Earth?",
     answers: [
-      { text: "Tomato", correct: false },
-      { text: "Avocado", correct: true },
-      { text: "Cucumber", correct: false },
-      { text: "Pepper", correct: false }
+      { text: "Atlantic Ocean", correct: false },
+      { text: "Indian Ocean", correct: false },
+      { text: "Arctic Ocean", correct: false },
+      { text: "Pacific Ocean", correct: true }
     ]
   },
   {
-    question: "Which social media app is known for short videos and trends?",
+    question: "Which animal is called the King of the Jungle?",
     answers: [
-      { text: "LinkedIn", correct: false },
-      { text: "Facebook", correct: false },
-      { text: "TikTok", correct: true },
-      { text: "Twitter", correct: false }
+      { text: "Tiger", correct: false },
+      { text: "Elephant", correct: false },
+      { text: "Lion", correct: true },
+      { text: "Bear", correct: false }
+    ]
+  },
+  {
+    question: "What color do you get when you mix red and blue?",
+    answers: [
+      { text: "Green", correct: false },
+      { text: "Purple", correct: true },
+      { text: "Orange", correct: false },
+      { text: "Brown", correct: false }
+    ]
+  },
+  {
+    question: "Which is the longest river in the world?",
+    answers: [
+      { text: "Amazon River", correct: false },
+      { text: "Nile River", correct: true },
+      { text: "Mississippi River", correct: false },
+      { text: "Yangtze River", correct: false }
+    ]
+  },
+  {
+    question: "How many days are there in a leap year?",
+    answers: [
+      { text: "365", correct: false },
+      { text: "366", correct: true },
+      { text: "364", correct: false },
+      { text: "367", correct: false }
+    ]
+  },
+  {
+    question: "Which sport is played at Wimbledon?",
+    answers: [
+      { text: "Cricket", correct: false },
+      { text: "Football", correct: false },
+      { text: "Tennis", correct: true },
+      { text: "Golf", correct: false }
+    ]
+  },
+  {
+    question: "What is the capital of Nigeria?",
+    answers: [
+      { text: "Lagos", correct: false },
+      { text: "Kano", correct: false },
+      { text: "Abuja", correct: true },
+      { text: "Port Harcourt", correct: false }
+    ]
+  },
+  {
+    question: "Which planet is closest to the Sun?",
+    answers: [
+      { text: "Venus", correct: false },
+      { text: "Earth", correct: false },
+      { text: "Mercury", correct: true },
+      { text: "Mars", correct: false }
+    ]
+  },
+  {
+    question: "How many sides does a triangle have?",
+    answers: [
+      { text: "2", correct: false },
+      { text: "3", correct: true },
+      { text: "4", correct: false },
+      { text: "5", correct: false }
+    ]
+  },
+  {
+    question: "Which fruit is yellow and monkeys love it?",
+    answers: [
+      { text: "Apple", correct: false },
+      { text: "Banana", correct: true },
+      { text: "Orange", correct: false },
+      { text: "Grapes", correct: false }
+    ]
+  },
+  {
+    question: "What do we use to measure temperature?",
+    answers: [
+      { text: "Ruler", correct: false },
+      { text: "Thermometer", correct: true },
+      { text: "Scale", correct: false },
+      { text: "Clock", correct: false }
+    ]
+  },
+  {
+    question: "Which is the fastest land animal?",
+    answers: [
+      { text: "Lion", correct: false },
+      { text: "Cheetah", correct: true },
+      { text: "Horse", correct: false },
+      { text: "Leopard", correct: false }
+    ]
+  },
+  {
+    question: "How many wheels does a bicycle have?",
+    answers: [
+      { text: "1", correct: false },
+      { text: "2", correct: true },
+      { text: "3", correct: false },
+      { text: "4", correct: false }
     ]
   }
-];;
+];
 
   const questiomElement = document.querySelector('.question')
   const answerButtons = document.querySelector('.btnn') 
