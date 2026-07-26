@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+
+     <script>
+  const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+   </script> 
+
+<head>
+<title>City Driver DOCTOR DRIVE V11.1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<style>
+  *{touch-action: manipulation;}
+  body { margin:0; overflow:hidden; background:#111; font-family:Arial; display:flex; justify-content:center; align-items:center; }
+  #gameContainer { position:relative; width:100%; max-width:420px; height:100vh; background:#000; overflow:hidden; }
+  #menu { position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:10; display:flex; gap:6px; }
+.mainBtn { padding:8px 12px; background:#FF6B00; border:none; color:#fff; font-weight:bold; border-radius:8px; font-size:12px; cursor:pointer; }
+  #ghostBtn { background:#00FF88; }
+  #hud { position:absolute; top:10px; left:10px; font-size:16px; color:#fff; background:rgba(0,0,0,0.7); padding:6px 10px; border-radius:8px; }
+  #cityName { position:absolute; top:50px; left:50%; transform:translateX(-50%); font-size:18px; color:#FFD700; font-weight:bold; text-shadow:0 0 5px #000; }
+  #controls { position:absolute; bottom:15px; width:100%; display:flex; justify-content:center; gap:15px; }
+.pad { width:60px; height:60px; font-size:22px; background:#222; color:#00E5FF; border:3px solid #00E5FF; border-radius:15px; cursor:pointer; user-select:none; }
+  #boost { background:#00FF88; color:#000; border-color:#00FF88; }
+  #brake { background:#FF3B30; color:#fff; border-color:#FF3B30; }
+  canvas { display:block; margin:0 auto; }
+</style>
+</head>
+<body>
+<div id="gameContainer">
+  <div id="menu">
+    <button class="mainBtn" onclick="game.play()">PLAY</button>
+    <button class="mainBtn" onclick="game.pause()">PAUSE</button>
+    <button id="ghostBtn" class="mainBtn" onclick="game.toggleGhost()">GHOST: ON</button>
+  </div>
+  <div id="hud">Speed: 0 KM/H</div>
+  <div id="cityName">CITY</div>
+
+  <div id="controls">
+    <button class="pad" id="leftBtn">←</button>
+    <button class="pad" id="upBtn">↑</button>
+    <button class="pad" id="rightBtn">→</button>
+    <button class="pad" id="brakeBtn">B</button>
+    <button class="pad" id="boostBtn">N</button>
+  </div>
+
+  <canvas id="game"></canvas>
+</div>
+<script>
+const game = {
+  canvas: document.getElementById('game'),
+  ctx: null,
+  running: true,
+  speed: 10,
+  carX: 0, carY: 0,
+  left: false, right: false, up: false, brake: false, boost: false,
+  score: 0, city: 0, roadOffsetX: 0,
+  traffic: [], buildings: [], 
+  stats: JSON.parse(localStorage.getItem('cityStatsDOCTOR11')) || {high:0, played:0, lost:0},
+  cities: ['CITY','DESERT','NIGHT'],
+  SAFE_DISTANCE: 100,
+  ghostMode: true,
+  ROAD_WIDTH: 200,
+
+  init() {
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    this.reset();
+    this.setupButtons();
+    this.loop();
+    window.addEventListener('keydown', e=>{ 
+      if(e.key=='ArrowLeft')this.left=true; 
+      if(e.key=='ArrowRight')this.right=true; 
+      if(e.key=='ArrowUp')this.up=true;
+    });
+    window.addEventListener('keyup', e=>{ 
+      if(e.key=='ArrowLeft')this.left=false; 
+      if(e.key=='ArrowRight')this.right=false; 
+      if(e.key=='ArrowUp')this.up=false;
+    });
+  },
+
+  toggleGhost(){
+    this.ghostMode = !this.ghostMode;
+    document.getElementById('ghostBtn').innerText = `GHOST: ${this.ghostMode?'ON':'OFF'}`;
+    document.getElementById('ghostBtn').style.background = this.ghostMode?'#00FF88':'#FF3B30';
+  },
+
+  setupButtons(){
+    const bind = (id, down, up) => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      ['mousedown','touchstart'].forEach(evt => el.addEventListener(evt, e=>{e.preventDefault(); down();}));
+      ['mouseup','mouseleave','touchend','touchcancel'].forEach(evt => el.addEventListener(evt, e=>{e.preventDefault(); up();}));
+    };
+    bind('leftBtn', ()=>this.left=true, ()=>this.left=false);
+    bind('rightBtn', ()=>this.right=true, ()=>this.right=false);
+    bind('upBtn', ()=>this.up=true, ()=>this.up=false);
+    bind('brakeBtn', ()=>this.brake=true, ()=>this.brake=false);
+    bind('boostBtn', ()=>this.boost=true, ()=>this.boost=false);
+  },
+
+  resize(){
+    this.canvas.width = 400;
+    this.canvas.height = window.innerHeight;
+    this.carX = this.canvas.width/2;
+    this.carY = this.canvas.height - 120;
+    this.roadPositions = [this.canvas.width/2-70, this.canvas.width/2, this.canvas.width/2+70];
+  },
+
+  reset() {
+    this.speed=10; this.score=0; this.carX=this.canvas.width/2; this.carY=this.canvas.height-120; this.roadOffsetX=0;
+    this.traffic=[]; this.buildings=[];
+    document.getElementById('cityName').innerText = this.cities[this.city];
+
+    for(let i=0;i<40;i++) this.buildings.push({ // LESS BUILDINGS TOO
+      x: Math.random()*this.canvas.width,
+      y: -Math.random()*2000,
+      w: 60+Math.random()*50,
+      h: 120+Math.random()*180,
+      floors: Math.floor(Math.random()*5)+2
+    });
+
+    // FIX: ONLY 6 CARS TOTAL. 2 PER LANE. 400px SPACING
+    for(let lane=0; lane<3; lane++){
+      for(let i=0;i<2;i++){ // WAS 5, NOW 2
+        this.traffic.push({
+          lane: lane,
+          x: this.roadPositions[lane] + this.roadOffsetX + (Math.random()-0.5)*10,
+          y: -i*400 - 500, // WAS 250, NOW 400 = MORE SPACE
+          color: `hsl(${Math.random()*360},90%,55%)`,
+          speed: 1.5 + Math.random()*2, // SLOWER TRAFFIC
+          targetLane: lane,
+          avoiding: false
+        });
+      }
+    }
+    this.updateStats();
+  },
+
+  play(){ this.running=true; this.stats.played++; this.save(); },
+  pause(){ this.running=false; },
+
+  save(){ localStorage.setItem('cityStatsDOCTOR11', JSON.stringify(this.stats)); },
+  updateStats(){ document.getElementById('hud').innerText = `Speed: ${Math.floor(this.speed*6)} KM/H | Score: ${this.score}`; },
+
+  update(){
+    if(!this.running) return;
+
+    if(this.left) { this.carX -= 7; this.roadOffsetX += 2; }
+    if(this.right) { this.carX += 7; this.roadOffsetX -= 2; }
+    if(this.up){ this.carY -= 8; this.speed += 0.5; }
+    if(this.brake) { this.carY += 6; this.speed -= 1.5; }
+    if(this.boost) this.speed += 1.5;
+    
+    if(!this.up && !this.boost && !this.brake) this.speed *= 0.98; 
+    if(this.speed < 8) this.speed = 8;
+    this.speed = Math.max(8, Math.min(this.speed, 50));
+
+    this.carY = Math.max(80, Math.min(this.carY, this.canvas.height - 80));
+    this.carX = Math.max(30, Math.min(this.carX, this.canvas.width-30));
+    
+    this.roadOffsetX *= 0.92; 
+    
+    if(Math.abs(this.roadOffsetX) > 120){
+      this.city = (this.city + (this.roadOffsetX>0?2:1)) % 3;
+      document.getElementById('cityName').innerText = `ENTERING ${this.cities[this.city]}`;
+      this.roadOffsetX *= 0.5;
+    }
+
+    this.buildings.forEach(b=>{ 
+      b.y += this.speed; 
+      if(b.y > this.canvas.height) b.y = -300;
+    });
+
+    this.traffic.forEach(t=>{
+      t.avoiding = false;
+      t.x = this.roadPositions[t.targetLane] + this.roadOffsetX;
+      t.y += this.speed + t.speed;
+      
+      let dx = t.x - this.carX;
+      let dy = t.y - this.carY;
+      let dist = Math.hypot(dx, dy);
+
+      if(this.ghostMode){
+        if(Math.abs(dx) < this.SAFE_DISTANCE && Math.abs(dy) < 150){
+          if(dx > 0){ if(t.lane < 2) t.targetLane = t.lane + 1; }
+          else { if(t.lane > 0) t.targetLane = t.lane - 1; }
+          t.speed *= 0.85;
+          t.avoiding = true;
+        }
+        if(dist < this.SAFE_DISTANCE) {
+          t.speed = Math.min(t.speed, 1);
+          t.avoiding = true;
+        }
+      }
+
+      if(t.y > this.canvas.height){
+        t.y = -400 - Math.random()*300; // RESPAWN FARTHER
+        t.lane = Math.floor(Math.random()*3);
+        t.targetLane = t.lane;
+        t.speed = 1.5 + Math.random()*2;
+        this.score++;
+      }
+
+      if(!this.ghostMode && dist < 40) this.crash();
+    });
+
+    this.updateStats();
+  },
+
+  crash(){
+    this.running=false;
+    this.stats.lost++;
+    if(this.score>this.stats.high) this.stats.high=this.score;
+    this.save();
+    setTimeout(()=>{ alert(`CRASH! Score: ${this.score}\nHigh Score: ${this.stats.high}`); this.reset(); }, 200);
+  },
+
+  roundRect(x, y, w, h, r){
+    this.ctx.beginPath();
+    this.ctx.moveTo(x+r, y);
+    this.ctx.lineTo(x+w-r, y);
+    this.ctx.arcTo(x+w, y, x+w, y+r, r);
+    this.ctx.lineTo(x+w, y+h-r);
+    this.ctx.arcTo(x+w, y+h, x+w-r, y+h, r);
+    this.ctx.lineTo(x+r, y+h);
+    this.ctx.arcTo(x, y+h, x, y+h-r, r);
+    this.ctx.lineTo(x, y+r);
+    this.ctx.arcTo(x, y, x+r, y, r);
+    this.ctx.closePath();
+  },
+
+  drawCar(x,y,color,avoiding){
+    this.ctx.fillStyle=color;
+    this.roundRect(x-18, y-30, 36, 60, 6);
+    this.ctx.fill();
+    this.ctx.fillStyle='rgba(0,0,0,0.7)';
+    this.ctx.fillRect(x-12, y-22, 24, 12);
+    this.ctx.fillRect(x-12, y+8, 24, 12);
+    this.ctx.fillStyle = avoiding? '#FF0000' : '#FFFFAA';
+    this.ctx.fillRect(x-15, y-26, 6, 3);
+    this.ctx.fillRect(x+9, y-26, 6, 3);
+    this.ctx.fillStyle='#111';
+    [[-12,-18], [12,-18], [-12,15], [12,15]].forEach(([ox,oy])=>{
+      this.ctx.beginPath(); this.ctx.arc(x+ox, y+oy, 5, 0, Math.PI*2); this.ctx.fill();
+    });
+  },
+
+  draw(){
+    let sky = this.ctx.createLinearGradient(0,0,0,this.canvas.height);
+    if(this.city==0){ sky.addColorStop(0,'#87CEEB'); sky.addColorStop(1,'#E0F6FF'); }
+    if(this.city==1){ sky.addColorStop(0,'#DEB887'); sky.addColorStop(1,'#F5DEB3'); }
+    if(this.city==2){ sky.addColorStop(0,'#050515'); sky.addColorStop(1,'#1a1a3a'); }
+    this.ctx.fillStyle=sky;
+    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+
+    this.buildings.forEach(b=>{
+      this.ctx.fillStyle=this.city==1?'#8B4513':(this.city==2?'#151515':'#333');
+      this.ctx.fillRect(b.x, b.y, b.w, b.h);
+      for(let i=0;i<b.floors;i++){
+        this.ctx.fillStyle=this.city==2?'#FFD700':'#ADD8E6';
+        this.ctx.fillRect(b.x+6, b.y+10+i*(b.h/b.floors), 8, 8);
+        this.ctx.fillRect(b.x+b.w-14, b.y+10+i*(b.h/b.floors), 8, 8);
+      }
+    });
+
+    let roadX = this.canvas.width/2 + this.roadOffsetX;
+    this.ctx.fillStyle='#444';
+    this.ctx.fillRect(roadX-this.ROAD_WIDTH/2, 0, this.ROAD_WIDTH, this.canvas.height);
+    this.ctx.fillStyle='#222';
+    this.ctx.fillRect(roadX-this.ROAD_WIDTH/2+8, 0, this.ROAD_WIDTH-16, this.canvas.height);
+    
+    this.ctx.strokeStyle=this.city==2?'#FFFF00':'#FFFFFF'; 
+    this.ctx.setLineDash([30,20]);
+    this.roadPositions.forEach(rp=>{
+      let x = rp + this.roadOffsetX;
+      this.ctx.beginPath(); this.ctx.moveTo(x,0); this.ctx.lineTo(x,this.canvas.height); this.ctx.stroke();
+    });
+    this.ctx.setLineDash([]);
+
+    this.traffic.forEach(t=>this.drawCar(t.x,t.y,t.color,t.avoiding));
+
+    this.ctx.shadowColor='rgba(255,0,0,0.8)'; this.ctx.shadowBlur=20;
+    this.drawCar(this.carX, this.carY, '#FF0000', false);
+    this.ctx.shadowBlur=0;
+
+    if(!this.running){
+      this.ctx.fillStyle='rgba(0,0,0,0.8)'; this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+      this.ctx.fillStyle='#fff'; this.ctx.font='32px Arial Black'; this.ctx.fillText('PAUSED', this.canvas.width/2-60, this.canvas.height/2);
+    }
+  },
+
+  loop(){
+    this.update();
+    this.draw();
+    requestAnimationFrame(()=>this.loop());
+  }
+};
+
+window.onload = ()=>game.init();
+window.onresize = ()=>game.resize();
+</script>
+</body>
+</html>

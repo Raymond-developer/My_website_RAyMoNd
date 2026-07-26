@@ -113,7 +113,7 @@ button:hover{
     width: 100%;
   }
 
-  .game, .quiz, .Calculator, .todo, .expense, .product{
+  .game, .quiz, .Calculator, .todo, .expense, .city, .product{
     margin-left: 40px;
   }
 
@@ -165,14 +165,14 @@ button:hover{
 
    <span> <button class="Calculator"> Rock Paper Scissor </button> 
   <span>  <button class="expense"> Snake </button> </span> </span>
-   
+   <button class="city"> City Drive </button>
   </div>
 
   <script>
 
 
    const calculator = document.querySelector('.Calculator')
-      const product = document.querySelector('.product')
+      const city = document.querySelector('.city')
          const quiz = document.querySelector('.quiz')
             const todo = document.querySelector('.todo')
                const expense = document.querySelector('.expense')
@@ -200,6 +200,10 @@ button:hover{
 
    logout.addEventListener('click', () => {
      window.location.href="mainpage.html"
+   })
+
+   city.addEventListener('click', () => {
+     window.location.href="cityg.html"
    })
 
    expense.addEventListener('click', () => {
