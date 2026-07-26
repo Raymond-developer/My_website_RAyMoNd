@@ -3,13 +3,13 @@
 <head>
  
    <script>
-   // This runs before the page shows
+  /* // This runs before the page shows
     const token = localStorage.getItem('token');
 
     if (!token) {
       // Not logged in? Kick out immediately
       window.location.replace('/login.html');
-    } 
+    } */
   </script>
    
     
@@ -20,7 +20,7 @@
   <style>
     
    body {
-  background-image: url("photo_2026-07-04_21-32-33.jpg");
+  background-image: url("photo_2026-07-24_19-55-32.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -29,9 +29,18 @@
   min-height: 100vh;
 }
 
-h1{
+.h11{
   display: grid;
   justify-content: center;
+  color: white;
+  font-size: 25px;
+}
+
+.h1{
+  display: grid;
+  justify-content: center;
+  color: white;
+  font-size: 25px;
 }
 
 .h22{
@@ -39,7 +48,8 @@ h1{
   justify-content: center;
   color: white;
   font-weight: 700;
-  margin-left: 15px;
+  margin-left: 24px;
+  font-size: 15px;
 }
 
 button {
@@ -47,7 +57,8 @@ button {
   font-weight: 700;
   margin: 7px;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 17px;
+  
 }
 
 button:hover{
@@ -58,6 +69,7 @@ button:hover{
   justify-self: center;
   align-items: center;
   margin-top: -10px;
+  
 }
 
 .para {
@@ -79,9 +91,11 @@ button:hover{
     margin-top: 200px;
   }
 
-  h1{
+  .h11{
   display: grid;
   justify-content: center;
+  color: white;
+  font-size: 25px;
 }
 }
 
@@ -101,6 +115,7 @@ button:hover{
   h1{
   display: grid;
   justify-content: center;
+  font-size: 25px;
 }
 }
 
@@ -119,16 +134,19 @@ button:hover{
     padding: 0 10%;
   }
   .grid {
-    width: 100%;
+    width: 280px;
+    
   }
 
   .game, .quiz, .Calculator, .todo, .expense, .product{
     margin-left: 40px;
   }
 
-  h1{
+  .h11{
   display: grid;
   justify-content: center;
+  color: white;
+  font-size: 25px;
 }
 }
 
@@ -142,33 +160,39 @@ button:hover{
   color: white;
   height: 50px;
   font-family: Roboto;
+  margin-top: -3px;
 }
 
 .count{
-  font-size: 10px;
+  font-size: 13px;
   display: grid;
   justify-content: center;
   margin-top: -15px;
-  margin-bottom: -15px;
+  margin-bottom: -10px;
+  color: blue;
 }
 
-.Note {
-  margin-left: 30px;
-  
+.Calculator {
+    width: 75%;
+  margin-top: -3px;
+   margin-right: 70px;
 }
 
 .Media{
-  width: 200px;
+  width: 100%;
+   margin-right: 30px;
 }
+
+
   </style>
 </head>
 <body>
 
   <div class="move">
-  <h1 class="h1"> WELCOME </h1>
+  <h2 class="h1"> WELCOME </h2>
   <h2 class="h22"> We cannot see your data only you can : keep you password secured</h2>
    <h2 class="count"> 1 </h2>
-  <h1> Author: RAyMoNd</h1>
+  <h2 class="h11"> Author: RAyMoNd</h2>
   </div>
     
     <div> <button class="logout"> Log out </button> </div>
@@ -177,10 +201,9 @@ button:hover{
    <h2 class="test"></h2> 
 
   <div class="grid">
+   <div>  <button class="Calculator"> Calculator </button> </div>
 
-   <span> <button class="Calculator"> Calculator  </span> <button class="Media"> my private space </button> </span>  
- </button> 
-   
+   <div>  <button class="Media"> My private space </button> </div> 
    
     <div> <button class="game"> games </button> 
     <span> <button class="product"> Product </button> </span>  </div>
