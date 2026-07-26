@@ -3,13 +3,13 @@
 <head>
  
    <script>
-    // This runs before the page shows
+   // This runs before the page shows
     const token = localStorage.getItem('token');
 
     if (!token) {
       // Not logged in? Kick out immediately
       window.location.replace('/login.html');
-    }
+    } 
   </script>
    
     
@@ -32,6 +32,14 @@
 h1{
   display: grid;
   justify-content: center;
+}
+
+.h22{
+  display: grid;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  margin-left: 15px;
 }
 
 button {
@@ -150,14 +158,15 @@ button:hover{
 }
 
 .Media{
-  width: 170px;
+  width: 200px;
 }
   </style>
 </head>
 <body>
 
   <div class="move">
-  <h1 class="h1"> Welcome </h1>
+  <h1 class="h1"> WELCOME </h1>
+  <h2 class="h22"> We cannot see your data only you can : keep you password secured</h2>
    <h2 class="count"> 1 </h2>
   <h1> Author: RAyMoNd</h1>
   </div>
@@ -168,15 +177,10 @@ button:hover{
    <h2 class="test"></h2> 
 
   <div class="grid">
-   <span><button class="Note"> Note </button> <span>
-    <button class="Media"> Save image/video </button>
-   </span> </span>  
 
-   <span> <button class="Calculator"> Calculator </button> 
-  <span>  <button class="expense"> Expense </button> </span> </span>
+   <span> <button class="Calculator"> Calculator  </span> <button class="Media"> my private space </button> </span>  
+ </button> 
    
-   <div> <button class="quiz"> Quiz </button>  
-   <span> <button class="todo"> Todo </button> </span> </div>
    
     <div> <button class="game"> games </button> 
     <span> <button class="product"> Product </button> </span>  </div>
@@ -230,24 +234,12 @@ button:hover{
    })  
      
    Media.addEventListener('click', () => {
-      window.location.href="media.html"
+      window.location.href="savemainpage.html"
    })  
-
-   Note.addEventListener('click', () => {
-      window.location.href="note.html"
-   })
 
    product.addEventListener('click', () => {
     // here 
      window.location.href="amazon.html"
-   })
-
-   quiz.addEventListener('click', () => {
-     window.location.href="quiz.html"
-   })
-
-   todo.addEventListener('click', () => {
-     window.location.href="todo.html"
    })
 
    changep.addEventListener('click', () => {
@@ -265,9 +257,6 @@ button:hover{
     
    })
 
-   expense.addEventListener('click', () => {
-     window.location.href="expense.html"
-   })
   </script>
 </body>
 </html>
