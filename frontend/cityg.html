@@ -1,29 +1,19 @@
 <!DOCTYPE html>
 <html>
-
-     <script>
-  const token = localStorage.getItem('token');
-
-    if (!token) {
-      // Not logged in? Kick out immediately
-      window.location.replace('/login.html');
-    }
-   </script> 
-
 <head>
-<title>City Driver DOCTOR DRIVE V11.1</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>City Driver DOCTOR DRIVE SMALL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
 <style>
   *{touch-action: manipulation;}
   body { margin:0; overflow:hidden; background:#111; font-family:Arial; display:flex; justify-content:center; align-items:center; }
-  #gameContainer { position:relative; width:100%; max-width:420px; height:100vh; background:#000; overflow:hidden; }
-  #menu { position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:10; display:flex; gap:6px; }
-.mainBtn { padding:8px 12px; background:#FF6B00; border:none; color:#fff; font-weight:bold; border-radius:8px; font-size:12px; cursor:pointer; }
+  #gameContainer { position:relative; width:100%; max-width:320px; height:100vh; background:#000; overflow:hidden; } /* SMALLER */
+  #menu { position:absolute; top:6px; left:50%; transform:translateX(-50%); z-index:10; display:flex; gap:4px; }
+.mainBtn { padding:6px 10px; background:#FF6B00; border:none; color:#fff; font-weight:bold; border-radius:6px; font-size:10px; cursor:pointer; }
   #ghostBtn { background:#00FF88; }
-  #hud { position:absolute; top:10px; left:10px; font-size:16px; color:#fff; background:rgba(0,0,0,0.7); padding:6px 10px; border-radius:8px; }
-  #cityName { position:absolute; top:50px; left:50%; transform:translateX(-50%); font-size:18px; color:#FFD700; font-weight:bold; text-shadow:0 0 5px #000; }
-  #controls { position:absolute; bottom:15px; width:100%; display:flex; justify-content:center; gap:15px; }
-.pad { width:60px; height:60px; font-size:22px; background:#222; color:#00E5FF; border:3px solid #00E5FF; border-radius:15px; cursor:pointer; user-select:none; }
+  #hud { position:absolute; top:6px; left:6px; font-size:12px; color:#fff; background:rgba(0,0,0,0.7); padding:4px 8px; border-radius:6px; }
+  #cityName { position:absolute; top:38px; left:50%; transform:translateX(-50%); font-size:14px; color:#FFD700; font-weight:bold; text-shadow:0 0 3px #000; }
+  #controls { position:absolute; bottom:10px; width:100%; display:flex; justify-content:center; gap:10px; }
+.pad { width:50px; height:50px; font-size:18px; background:#222; color:#00E5FF; border:2px solid #00E5FF; border-radius:12px; cursor:pointer; user-select:none; }
   #boost { background:#00FF88; color:#000; border-color:#00FF88; }
   #brake { background:#FF3B30; color:#fff; border-color:#FF3B30; }
   canvas { display:block; margin:0 auto; }
@@ -54,16 +44,16 @@ const game = {
   canvas: document.getElementById('game'),
   ctx: null,
   running: true,
-  speed: 10,
+  speed: 6, // SLOWER START
   carX: 0, carY: 0,
   left: false, right: false, up: false, brake: false, boost: false,
   score: 0, city: 0, roadOffsetX: 0,
   traffic: [], buildings: [], 
-  stats: JSON.parse(localStorage.getItem('cityStatsDOCTOR11')) || {high:0, played:0, lost:0},
+  stats: JSON.parse(localStorage.getItem('cityStatsSMALL')) || {high:0, played:0, lost:0},
   cities: ['CITY','DESERT','NIGHT'],
-  SAFE_DISTANCE: 100,
+  SAFE_DISTANCE: 80, // SMALLER BUBBLE
   ghostMode: true,
-  ROAD_WIDTH: 200,
+  ROAD_WIDTH: 160, // NARROWER ROAD
 
   init() {
     this.ctx = this.canvas.getContext('2d');
@@ -104,35 +94,36 @@ const game = {
   },
 
   resize(){
-    this.canvas.width = 400;
+    this.canvas.width = 320; // SMALL WIDTH
     this.canvas.height = window.innerHeight;
     this.carX = this.canvas.width/2;
-    this.carY = this.canvas.height - 120;
-    this.roadPositions = [this.canvas.width/2-70, this.canvas.width/2, this.canvas.width/2+70];
+    this.carY = this.canvas.height - 100; // CAR HIGHER
+    this.roadPositions = [this.canvas.width/2-50, this.canvas.width/2, this.canvas.width/2+50]; // LANES CLOSER
   },
 
   reset() {
-    this.speed=10; this.score=0; this.carX=this.canvas.width/2; this.carY=this.canvas.height-120; this.roadOffsetX=0;
+    this.speed=6; this.score=0; this.carX=this.canvas.width/2; this.carY=this.canvas.height-100; this.roadOffsetX=0;
     this.traffic=[]; this.buildings=[];
     document.getElementById('cityName').innerText = this.cities[this.city];
 
-    for(let i=0;i<40;i++) this.buildings.push({ // LESS BUILDINGS TOO
+    for(let i=0;i<30;i++) this.buildings.push({ // FEWER BUILDINGS
       x: Math.random()*this.canvas.width,
-      y: -Math.random()*2000,
-      w: 60+Math.random()*50,
-      h: 120+Math.random()*180,
-      floors: Math.floor(Math.random()*5)+2
+      y: -Math.random()*1500,
+      w: 50+Math.random()*40,
+      h: 100+Math.random()*120,
+      floors: Math.floor(Math.random()*4)+2
     });
 
-    // FIX: ONLY 6 CARS TOTAL. 2 PER LANE. 400px SPACING
+    // ONLY 4 CARS TOTAL. VERY SLOW
     for(let lane=0; lane<3; lane++){
-      for(let i=0;i<2;i++){ // WAS 5, NOW 2
+      for(let i=0;i<2;i++){
+        if(lane==2 && i==1) continue; // SKIP 1 CAR = TOTAL 5 CARS
         this.traffic.push({
           lane: lane,
-          x: this.roadPositions[lane] + this.roadOffsetX + (Math.random()-0.5)*10,
-          y: -i*400 - 500, // WAS 250, NOW 400 = MORE SPACE
+          x: this.roadPositions[lane] + this.roadOffsetX,
+          y: -i*500 - 400, // MORE SPACE
           color: `hsl(${Math.random()*360},90%,55%)`,
-          speed: 1.5 + Math.random()*2, // SLOWER TRAFFIC
+          speed: 1 + Math.random()*1, // VERY SLOW TRAFFIC
           targetLane: lane,
           avoiding: false
         });
@@ -144,28 +135,29 @@ const game = {
   play(){ this.running=true; this.stats.played++; this.save(); },
   pause(){ this.running=false; },
 
-  save(){ localStorage.setItem('cityStatsDOCTOR11', JSON.stringify(this.stats)); },
-  updateStats(){ document.getElementById('hud').innerText = `Speed: ${Math.floor(this.speed*6)} KM/H | Score: ${this.score}`; },
+  save(){ localStorage.setItem('cityStatsSMALL', JSON.stringify(this.stats)); },
+  updateStats(){ document.getElementById('hud').innerText = `Speed: ${Math.floor(this.speed*5)} KM/H | Score: ${this.score}`; },
 
   update(){
     if(!this.running) return;
 
-    if(this.left) { this.carX -= 7; this.roadOffsetX += 2; }
-    if(this.right) { this.carX += 7; this.roadOffsetX -= 2; }
-    if(this.up){ this.carY -= 8; this.speed += 0.5; }
-    if(this.brake) { this.carY += 6; this.speed -= 1.5; }
-    if(this.boost) this.speed += 1.5;
+    let moveSpeed = 5; // SLOWER TURNING
+    if(this.left) { this.carX -= moveSpeed; this.roadOffsetX += 1.5; }
+    if(this.right) { this.carX += moveSpeed; this.roadOffsetX -= 1.5; }
+    if(this.up){ this.carY -= 5; this.speed += 0.3; } // SLOWER UP
+    if(this.brake) { this.carY += 4; this.speed -= 1; }
+    if(this.boost) this.speed += 0.8;
     
-    if(!this.up && !this.boost && !this.brake) this.speed *= 0.98; 
-    if(this.speed < 8) this.speed = 8;
-    this.speed = Math.max(8, Math.min(this.speed, 50));
+    if(!this.up && !this.boost && !this.brake) this.speed *= 0.985; 
+    if(this.speed < 5) this.speed = 5; // MIN SPEED LOWER
+    this.speed = Math.max(5, Math.min(this.speed, 30)); // MAX SPEED LOWER
 
-    this.carY = Math.max(80, Math.min(this.carY, this.canvas.height - 80));
-    this.carX = Math.max(30, Math.min(this.carX, this.canvas.width-30));
+    this.carY = Math.max(70, Math.min(this.carY, this.canvas.height - 70));
+    this.carX = Math.max(25, Math.min(this.carX, this.canvas.width-25));
     
-    this.roadOffsetX *= 0.92; 
+    this.roadOffsetX *= 0.93; 
     
-    if(Math.abs(this.roadOffsetX) > 120){
+    if(Math.abs(this.roadOffsetX) > 90){
       this.city = (this.city + (this.roadOffsetX>0?2:1)) % 3;
       document.getElementById('cityName').innerText = `ENTERING ${this.cities[this.city]}`;
       this.roadOffsetX *= 0.5;
@@ -173,7 +165,7 @@ const game = {
 
     this.buildings.forEach(b=>{ 
       b.y += this.speed; 
-      if(b.y > this.canvas.height) b.y = -300;
+      if(b.y > this.canvas.height) b.y = -200;
     });
 
     this.traffic.forEach(t=>{
@@ -186,27 +178,27 @@ const game = {
       let dist = Math.hypot(dx, dy);
 
       if(this.ghostMode){
-        if(Math.abs(dx) < this.SAFE_DISTANCE && Math.abs(dy) < 150){
+        if(Math.abs(dx) < this.SAFE_DISTANCE && Math.abs(dy) < 120){
           if(dx > 0){ if(t.lane < 2) t.targetLane = t.lane + 1; }
           else { if(t.lane > 0) t.targetLane = t.lane - 1; }
-          t.speed *= 0.85;
+          t.speed *= 0.9;
           t.avoiding = true;
         }
         if(dist < this.SAFE_DISTANCE) {
-          t.speed = Math.min(t.speed, 1);
+          t.speed = Math.min(t.speed, 0.8);
           t.avoiding = true;
         }
       }
 
       if(t.y > this.canvas.height){
-        t.y = -400 - Math.random()*300; // RESPAWN FARTHER
+        t.y = -500 - Math.random()*200;
         t.lane = Math.floor(Math.random()*3);
         t.targetLane = t.lane;
-        t.speed = 1.5 + Math.random()*2;
+        t.speed = 1 + Math.random()*1;
         this.score++;
       }
 
-      if(!this.ghostMode && dist < 40) this.crash();
+      if(!this.ghostMode && dist < 35) this.crash();
     });
 
     this.updateStats();
@@ -236,17 +228,17 @@ const game = {
 
   drawCar(x,y,color,avoiding){
     this.ctx.fillStyle=color;
-    this.roundRect(x-18, y-30, 36, 60, 6);
+    this.roundRect(x-14, y-24, 28, 48, 4); // SMALLER CAR
     this.ctx.fill();
     this.ctx.fillStyle='rgba(0,0,0,0.7)';
-    this.ctx.fillRect(x-12, y-22, 24, 12);
-    this.ctx.fillRect(x-12, y+8, 24, 12);
+    this.ctx.fillRect(x-9, y-18, 18, 8);
+    this.ctx.fillRect(x-9, y+8, 18, 8);
     this.ctx.fillStyle = avoiding? '#FF0000' : '#FFFFAA';
-    this.ctx.fillRect(x-15, y-26, 6, 3);
-    this.ctx.fillRect(x+9, y-26, 6, 3);
+    this.ctx.fillRect(x-12, y-22, 5, 2);
+    this.ctx.fillRect(x+7, y-22, 5, 2);
     this.ctx.fillStyle='#111';
-    [[-12,-18], [12,-18], [-12,15], [12,15]].forEach(([ox,oy])=>{
-      this.ctx.beginPath(); this.ctx.arc(x+ox, y+oy, 5, 0, Math.PI*2); this.ctx.fill();
+    [[-9,-14], [9,-14], [-9,12], [9,12]].forEach(([ox,oy])=>{
+      this.ctx.beginPath(); this.ctx.arc(x+ox, y+oy, 3.5, 0, Math.PI*2); this.ctx.fill();
     });
   },
 
@@ -263,8 +255,8 @@ const game = {
       this.ctx.fillRect(b.x, b.y, b.w, b.h);
       for(let i=0;i<b.floors;i++){
         this.ctx.fillStyle=this.city==2?'#FFD700':'#ADD8E6';
-        this.ctx.fillRect(b.x+6, b.y+10+i*(b.h/b.floors), 8, 8);
-        this.ctx.fillRect(b.x+b.w-14, b.y+10+i*(b.h/b.floors), 8, 8);
+        this.ctx.fillRect(b.x+5, b.y+8+i*(b.h/b.floors), 6, 6);
+        this.ctx.fillRect(b.x+b.w-11, b.y+8+i*(b.h/b.floors), 6, 6);
       }
     });
 
@@ -272,10 +264,10 @@ const game = {
     this.ctx.fillStyle='#444';
     this.ctx.fillRect(roadX-this.ROAD_WIDTH/2, 0, this.ROAD_WIDTH, this.canvas.height);
     this.ctx.fillStyle='#222';
-    this.ctx.fillRect(roadX-this.ROAD_WIDTH/2+8, 0, this.ROAD_WIDTH-16, this.canvas.height);
+    this.ctx.fillRect(roadX-this.ROAD_WIDTH/2+6, 0, this.ROAD_WIDTH-12, this.canvas.height);
     
     this.ctx.strokeStyle=this.city==2?'#FFFF00':'#FFFFFF'; 
-    this.ctx.setLineDash([30,20]);
+    this.ctx.setLineDash([20,15]); // SMALLER DASHES
     this.roadPositions.forEach(rp=>{
       let x = rp + this.roadOffsetX;
       this.ctx.beginPath(); this.ctx.moveTo(x,0); this.ctx.lineTo(x,this.canvas.height); this.ctx.stroke();
@@ -284,13 +276,13 @@ const game = {
 
     this.traffic.forEach(t=>this.drawCar(t.x,t.y,t.color,t.avoiding));
 
-    this.ctx.shadowColor='rgba(255,0,0,0.8)'; this.ctx.shadowBlur=20;
+    this.ctx.shadowColor='rgba(255,0,0,0.8)'; this.ctx.shadowBlur=15;
     this.drawCar(this.carX, this.carY, '#FF0000', false);
     this.ctx.shadowBlur=0;
 
     if(!this.running){
       this.ctx.fillStyle='rgba(0,0,0,0.8)'; this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-      this.ctx.fillStyle='#fff'; this.ctx.font='32px Arial Black'; this.ctx.fillText('PAUSED', this.canvas.width/2-60, this.canvas.height/2);
+      this.ctx.fillStyle='#fff'; this.ctx.font='24px Arial Black'; this.ctx.fillText('PAUSED', this.canvas.width/2-45, this.canvas.height/2);
     }
   },
 
