@@ -1,31 +1,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-   <script>
-  const token = localStorage.getItem('token');
-
-    if (!token) {
-      // Not logged in? Kick out immediately
-      window.location.replace('/login.html');
-    }
-   </script> 
-
-<title>City Driver PHONE FIX</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+<title>City Driver PHONE FIX V11.4</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, viewport-fit=cover">
 <style>
   *{touch-action: manipulation;}
-  body { margin:0; overflow:hidden; background:#000; font-family:Arial; }
-  #gameContainer { position:relative; width:100vw; height:500px; background:#000; overflow:hidden; } /* FULL SCREEN */
-  #menu { position:absolute; top:50px; left:50%; transform:translateX(-50%); z-index:10; display:flex; gap:8px; } /* MOVED DOWN */
-.mainBtn { padding:10px 14px; background:#FF6B00; border:none; color:#fff; font-weight:bold; border-radius:10px; font-size:13px; cursor:pointer; box-shadow:0 2px 5px #000; }
+  body { margin:0; overflow:hidden; background:#000; font-family:Arial; padding-bottom: env(safe-area-inset-bottom); } /* FIX FOR IPHONE/ANDROID BAR */
+  #gameContainer { position:relative; width:100vw; height:100vh; background:#000; overflow:hidden; }
+  
+  #menu { position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:10; display:flex; gap:5px; }
+  .mainBtn { padding:7px 10px; background:#FF6B00; border:none; color:#fff; font-weight:bold; border-radius:8px; font-size:11px; cursor:pointer; box-shadow:0 2px 4px #000; }
   #ghostBtn { background:#00FF88; }
-  #hud { position:absolute; top:10px; left:10px; font-size:14px; color:#fff; background:rgba(0,0,0,0.8); padding:6px 10px; border-radius:8px; z-index:5; }
-  #cityName { position:absolute; top:10px; right:10px; font-size:14px; color:#FFD700; font-weight:bold; text-shadow:0 0 3px #000; z-index:5; }
-  #controls { position:absolute; bottom:25px; width:100%; display:flex; justify-content:center; gap:12px; z-index:5; } /* BIGGER GAP */
-.pad { width:65px; height:65px; font-size:24px; background:rgba(34,34,34,0.9); color:#00E5FF; border:3px solid #00E5FF; border-radius:18px; cursor:pointer; user-select:none; box-shadow:0 0 10px #00E5FF; }
-  #boost { background:rgba(0,255,136,0.9); color:#000; border-color:#00FF88; box-shadow:0 0 10px #00FF88; }
-  #brake { background:rgba(255,59,48,0.9); color:#fff; border-color:#FF3B30; box-shadow:0 0 10px #FF3B30; }
+  
+  #hud { position:absolute; top:8px; left:8px; font-size:12px; color:#fff; background:rgba(0,0,0,0.85); padding:5px 8px; border-radius:6px; z-index:5; }
+  #cityName { position:absolute; top:8px; right:8px; font-size:12px; color:#FFD700; font-weight:bold; text-shadow:0 0 2px #000; z-index:5; }
+  
+  #controls { 
+    position:absolute; 
+    bottom: calc(15px + env(safe-area-inset-bottom)); /* LIFT ABOVE NAV BAR */
+    width:100%; 
+    display:flex; 
+    justify-content:center; 
+    gap:8px; 
+    z-index:5; 
+    padding:0 5px;
+    box-sizing:border-box;
+  }
+  .pad { 
+    width:18vw; /* USE % OF SCREEN WIDTH */
+    max-width:55px; 
+    height:18vw; 
+    max-height:55px; 
+    font-size:20px; 
+    background:rgba(34,34,34,0.95); 
+    color:#00E5FF; 
+    border:2px solid #00E5FF; 
+    border-radius:14px; 
+    cursor:pointer; 
+    user-select:none; 
+    box-shadow:0 0 8px #00E5FF;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  #boost { background:rgba(0,255,136,0.95); color:#000; border-color:#00FF88; box-shadow:0 0 8px #00FF88; }
+  #brake { background:rgba(255,59,48,0.95); color:#fff; border-color:#FF3B30; box-shadow:0 0 8px #FF3B30; }
+  #downBtn { background:rgba(255,165,0,0.95); color:#000; border-color:#FFA500; box-shadow:0 0 8px #FFA500; } /* ORANGE DOWN */
   canvas { display:block; width:100%; height:100%; }
 </style>
 </head>
@@ -43,6 +63,7 @@
   <div id="controls">
     <button class="pad" id="leftBtn">←</button>
     <button class="pad" id="upBtn">↑</button>
+    <button class="pad" id="downBtn">↓</button> <!-- NEW DOWN BUTTON -->
     <button class="pad" id="rightBtn">→</button>
     <button class="pad" id="brakeBtn">B</button>
     <button class="pad" id="boostBtn">N</button>
@@ -55,15 +76,15 @@ const game = {
   canvas: document.getElementById('game'),
   ctx: null,
   running: true,
-  speed: 8,
+  speed: 7,
   carX: 0, carY: 0,
-  left: false, right: false, up: false, brake: false, boost: false,
+  left: false, right: false, up: false, down: false, brake: false, boost: false, // ADDED DOWN
   score: 0, city: 0, roadOffsetX: 0,
   traffic: [], buildings: [], 
   cities: ['CITY','DESERT','NIGHT'],
-  SAFE_DISTANCE: 90,
+  SAFE_DISTANCE: 85,
   ghostMode: true,
-  ROAD_WIDTH: 180,
+  ROAD_WIDTH: 170,
 
   init() {
     this.ctx = this.canvas.getContext('2d');
@@ -75,11 +96,13 @@ const game = {
       if(e.key=='ArrowLeft')this.left=true; 
       if(e.key=='ArrowRight')this.right=true; 
       if(e.key=='ArrowUp')this.up=true;
+      if(e.key=='ArrowDown')this.down=true; // KEYBOARD DOWN
     });
     window.addEventListener('keyup', e=>{ 
       if(e.key=='ArrowLeft')this.left=false; 
       if(e.key=='ArrowRight')this.right=false; 
       if(e.key=='ArrowUp')this.up=false;
+      if(e.key=='ArrowDown')this.down=false;
     });
   },
 
@@ -99,6 +122,7 @@ const game = {
     bind('leftBtn', ()=>this.left=true, ()=>this.left=false);
     bind('rightBtn', ()=>this.right=true, ()=>this.right=false);
     bind('upBtn', ()=>this.up=true, ()=>this.up=false);
+    bind('downBtn', ()=>this.down=true, ()=>this.down=false); // NEW DOWN BIND
     bind('brakeBtn', ()=>this.brake=true, ()=>this.brake=false);
     bind('boostBtn', ()=>this.boost=true, ()=>this.boost=false);
   },
@@ -108,20 +132,20 @@ const game = {
     this.canvas.height = window.innerHeight * window.devicePixelRatio;
     this.ctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);
     this.carX = window.innerWidth/2;
-    this.carY = window.innerHeight - 130;
-    this.roadPositions = [window.innerWidth/2-60, window.innerWidth/2, window.innerWidth/2+60];
+    this.carY = window.innerHeight - 150; // CAR HIGHER SO BUTTONS DON'T COVER
+    this.roadPositions = [window.innerWidth/2-55, window.innerWidth/2, window.innerWidth/2+55];
   },
 
   reset() {
-    this.speed=8; this.score=0; this.carX=window.innerWidth/2; this.carY=window.innerHeight-130; this.roadOffsetX=0;
+    this.speed=7; this.score=0; this.carX=window.innerWidth/2; this.carY=window.innerHeight-150; this.roadOffsetX=0;
     this.traffic=[]; this.buildings=[];
 
-    for(let i=0;i<25;i++) this.buildings.push({
+    for(let i=0;i<20;i++) this.buildings.push({
       x: Math.random()*window.innerWidth,
-      y: -Math.random()*1500,
-      w: 50+Math.random()*40,
-      h: 100+Math.random()*120,
-      floors: Math.floor(Math.random()*4)+2
+      y: -Math.random()*1200,
+      w: 45+Math.random()*35,
+      h: 90+Math.random()*100,
+      floors: Math.floor(Math.random()*3)+2
     });
 
     // ONLY 4 CARS
@@ -131,9 +155,9 @@ const game = {
         this.traffic.push({
           lane: lane,
           x: this.roadPositions[lane],
-          y: -i*450 - 400,
+          y: -i*420 - 350,
           color: `hsl(${Math.random()*360},90%,55%)`,
-          speed: 1.2 + Math.random()*1,
+          speed: 1 + Math.random()*0.8,
           targetLane: lane,
           avoiding: false
         });
@@ -150,23 +174,24 @@ const game = {
   update(){
     if(!this.running) return;
 
-    let moveSpeed = 6;
-    if(this.left) { this.carX -= moveSpeed; this.roadOffsetX += 1.8; }
-    if(this.right) { this.carX += moveSpeed; this.roadOffsetX -= 1.8; }
-    if(this.up){ this.carY -= 6; this.speed += 0.4; }
-    if(this.brake) { this.carY += 5; this.speed -= 1.2; }
-    if(this.boost) this.speed += 1;
+    let moveSpeed = 5.5;
+    if(this.left) { this.carX -= moveSpeed; this.roadOffsetX += 1.6; }
+    if(this.right) { this.carX += moveSpeed; this.roadOffsetX -= 1.6; }
+    if(this.up){ this.carY -= 5; this.speed += 0.35; }
+    if(this.down){ this.carY += 5; this.speed -= 0.5; } // DOWN BUTTON = GO BACK
+    if(this.brake) { this.speed -= 1; }
+    if(this.boost) this.speed += 0.9;
     
-    if(!this.up && !this.boost && !this.brake) this.speed *= 0.985; 
-    if(this.speed < 6) this.speed = 6;
-    this.speed = Math.max(6, Math.min(this.speed, 35));
+    if(!this.up && !this.boost && !this.down) this.speed *= 0.99; 
+    if(this.speed < 4) this.speed = 4;
+    this.speed = Math.max(4, Math.min(this.speed, 28));
 
-    this.carY = Math.max(80, Math.min(this.carY, window.innerHeight - 80));
-    this.carX = Math.max(25, Math.min(this.carX, window.innerWidth-25));
+    this.carY = Math.max(90, Math.min(this.carY, window.innerHeight - 90));
+    this.carX = Math.max(20, Math.min(this.carX, window.innerWidth-20));
     
-    this.roadOffsetX *= 0.92; 
+    this.roadOffsetX *= 0.93; 
     
-    if(Math.abs(this.roadOffsetX) > 100){
+    if(Math.abs(this.roadOffsetX) > 95){
       this.city = (this.city + (this.roadOffsetX>0?2:1)) % 3;
       document.getElementById('cityName').innerText = this.cities[this.city];
       this.roadOffsetX *= 0.5;
@@ -174,7 +199,7 @@ const game = {
 
     this.buildings.forEach(b=>{ 
       b.y += this.speed; 
-      if(b.y > window.innerHeight) b.y = -200;
+      if(b.y > window.innerHeight) b.y = -150;
     });
 
     this.traffic.forEach(t=>{
@@ -186,22 +211,22 @@ const game = {
       let dy = t.y - this.carY;
       let dist = Math.hypot(dx, dy);
 
-      if(this.ghostMode && dist < this.SAFE_DISTANCE && Math.abs(dy) < 130){
+      if(this.ghostMode && dist < this.SAFE_DISTANCE && Math.abs(dy) < 120){
         if(dx > 0){ if(t.lane < 2) t.targetLane = t.lane + 1; }
         else { if(t.lane > 0) t.targetLane = t.lane - 1; }
-        t.speed *= 0.9;
+        t.speed *= 0.92;
         t.avoiding = true;
       }
 
       if(t.y > window.innerHeight){
-        t.y = -450 - Math.random()*200;
+        t.y = -420 - Math.random()*150;
         t.lane = Math.floor(Math.random()*3);
         t.targetLane = t.lane;
-        t.speed = 1.2 + Math.random()*1;
+        t.speed = 1 + Math.random()*0.8;
         this.score++;
       }
 
-      if(!this.ghostMode && dist < 35) {
+      if(!this.ghostMode && dist < 32) {
         this.running=false;
         setTimeout(()=>{ alert(`CRASH! Score: ${this.score}`); this.reset(); }, 200);
       }
@@ -212,17 +237,17 @@ const game = {
 
   drawCar(x,y,color,avoiding){
     this.ctx.fillStyle=color;
-    this.roundRect(x-15, y-26, 30, 52, 5);
+    this.roundRect(x-14, y-24, 28, 48, 4);
     this.ctx.fill();
     this.ctx.fillStyle='rgba(0,0,0,0.7)';
-    this.ctx.fillRect(x-10, y-19, 20, 9);
-    this.ctx.fillRect(x-10, y+8, 20, 9);
+    this.ctx.fillRect(x-9, y-18, 18, 8);
+    this.ctx.fillRect(x-9, y+8, 18, 8);
     this.ctx.fillStyle = avoiding? '#FF0000' : '#FFFFAA';
-    this.ctx.fillRect(x-13, y-23, 5, 2);
-    this.ctx.fillRect(x+8, y-23, 5, 2);
+    this.ctx.fillRect(x-12, y-21, 5, 2);
+    this.ctx.fillRect(x+7, y-21, 5, 2);
     this.ctx.fillStyle='#111';
-    [[-10,-15], [10,-15], [-10,13], [10,13]].forEach(([ox,oy])=>{
-      this.ctx.beginPath(); this.ctx.arc(x+ox, y+oy, 4, 0, Math.PI*2); this.ctx.fill();
+    [[-9,-14], [9,-14], [-9,12], [9,12]].forEach(([ox,oy])=>{
+      this.ctx.beginPath(); this.ctx.arc(x+ox, y+oy, 3.5, 0, Math.PI*2); this.ctx.fill();
     });
   },
   roundRect(x, y, w, h, r){
@@ -254,8 +279,8 @@ const game = {
       this.ctx.fillRect(b.x, b.y, b.w, b.h);
       for(let i=0;i<b.floors;i++){
         this.ctx.fillStyle=this.city==2?'#FFD700':'#ADD8E6';
-        this.ctx.fillRect(b.x+5, b.y+8+i*(b.h/b.floors), 6, 6);
-        this.ctx.fillRect(b.x+b.w-11, b.y+8+i*(b.h/b.floors), 6, 6);
+        this.ctx.fillRect(b.x+4, b.y+7+i*(b.h/b.floors), 5, 5);
+        this.ctx.fillRect(b.x+b.w-9, b.y+7+i*(b.h/b.floors), 5, 5);
       }
     });
 
@@ -263,7 +288,7 @@ const game = {
     this.ctx.fillStyle='#222';
     this.ctx.fillRect(roadX-this.ROAD_WIDTH/2, 0, this.ROAD_WIDTH, h);
     this.ctx.strokeStyle=this.city==2?'#FFFF00':'#FFFFFF'; 
-    this.ctx.setLineDash([25,18]);
+    this.ctx.setLineDash([22,15]);
     this.roadPositions.forEach(rp=>{
       let x = rp + this.roadOffsetX;
       this.ctx.beginPath(); this.ctx.moveTo(x,0); this.ctx.lineTo(x,h); this.ctx.stroke();
@@ -272,13 +297,13 @@ const game = {
 
     this.traffic.forEach(t=>this.drawCar(t.x,t.y,t.color,t.avoiding));
 
-    this.ctx.shadowColor='rgba(255,0,0,0.9)'; this.ctx.shadowBlur=25;
+    this.ctx.shadowColor='rgba(255,0,0,0.9)'; this.ctx.shadowBlur=20;
     this.drawCar(this.carX, this.carY, '#FF0000', false);
     this.ctx.shadowBlur=0;
 
     if(!this.running){
       this.ctx.fillStyle='rgba(0,0,0,0.8)'; this.ctx.fillRect(0,0,w,h);
-      this.ctx.fillStyle='#fff'; this.ctx.font='bold 32px Arial'; this.ctx.textAlign='center'; 
+      this.ctx.fillStyle='#fff'; this.ctx.font='bold 28px Arial'; this.ctx.textAlign='center'; 
       this.ctx.fillText('PAUSED', w/2, h/2);
     }
   },
@@ -291,7 +316,6 @@ const game = {
 };
 
 window.onload = ()=>game.init();
-
 window.onresize = ()=>game.resize();
 </script>
 </body>
