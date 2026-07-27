@@ -198,36 +198,108 @@ html, body {
   </div>
 
   <script>
-     const questions = [
+    const questions = [
   {
-    question: "Which country is known as the Land of the Rising Sun?",
+    question: "Which company created the iPhone?",
+    answers: [
+      { text: "Samsung", correct: false },
+      { text: "Google", correct: false },
+      { text: "Apple", correct: true },
+      { text: "Microsoft", correct: false }
+    ]
+  },
+  {
+    question: "What is the hardest natural substance on Earth?",
+    answers: [
+      { text: "Gold", correct: false },
+      { text: "Iron", correct: false },
+      { text: "Diamond", correct: true },
+      { text: "Quartz", correct: false }
+    ]
+  },
+  {
+    question: "Which country hosted the 2020 Olympics?",
     answers: [
       { text: "China", correct: false },
       { text: "Japan", correct: true },
-      { text: "South Korea", correct: false },
-      { text: "Thailand", correct: false }
+      { text: "Brazil", correct: false },
+      { text: "France", correct: false }
     ]
   },
   {
-    question: "How many continents are there in the world?",
+    question: "How many players are on a soccer team on the field?",
     answers: [
-      { text: "5", correct: false },
-      { text: "6", correct: false },
-      { text: "7", correct: true },
-      { text: "8", correct: false }
+      { text: "9", correct: false },
+      { text: "10", correct: false },
+      { text: "11", correct: true },
+      { text: "12", correct: false }
     ]
   },
   {
-    question: "What is the largest ocean on Earth?",
+    question: "What does 'HTTP' stand for?",
+    answers: [
+      { text: "Hyper Text Transfer Protocol", correct: true },
+      { text: "High Tech Transfer Process", correct: false },
+      { text: "Hyper Tool Transfer Point", correct: false },
+      { text: "Home Text Transfer Protocol", correct: false }
+    ]
+  },
+  {
+    question: "Which blood type is known as the universal donor?",
+    answers: [
+      { text: "A+", correct: false },
+      { text: "B+", correct: false },
+      { text: "AB+", correct: false },
+      { text: "O-", correct: true }
+    ]
+  },
+  {
+    question: "Which is the largest planet in our solar system?",
+    answers: [
+      { text: "Earth", correct: false },
+      { text: "Saturn", correct: false },
+      { text: "Jupiter", correct: true },
+      { text: "Neptune", correct: false }
+    ]
+  },
+  {
+    question: "What is the main ingredient in guacamole?",
+    answers: [
+      { text: "Tomato", correct: false },
+      { text: "Avocado", correct: true },
+      { text: "Onion", correct: false },
+      { text: "Pepper", correct: false }
+    ]
+  },
+  {
+    question: "In which year was Facebook launched?",
+    answers: [
+      { text: "2002", correct: false },
+      { text: "2004", correct: true },
+      { text: "2006", correct: false },
+      { text: "2008", correct: false }
+    ]
+  },
+  {
+    question: "Which ocean is between Africa and Australia?",
     answers: [
       { text: "Atlantic Ocean", correct: false },
-      { text: "Indian Ocean", correct: false },
-      { text: "Arctic Ocean", correct: false },
-      { text: "Pacific Ocean", correct: true }
+      { text: "Pacific Ocean", correct: false },
+      { text: "Indian Ocean", correct: true },
+      { text: "Arctic Ocean", correct: false }
     ]
   },
   {
-    question: "Which animal is called the King of the Jungle?",
+    question: "What color is a banana when it is ripe?",
+    answers: [
+      { text: "Green", correct: false },
+      { text: "Yellow", correct: true },
+      { text: "Red", correct: false },
+      { text: "Blue", correct: false }
+    ]
+  },
+  {
+    question: "Which animal is known as the King of the Jungle?",
     answers: [
       { text: "Tiger", correct: false },
       { text: "Elephant", correct: false },
@@ -236,25 +308,52 @@ html, body {
     ]
   },
   {
-    question: "What color do you get when you mix red and blue?",
+    question: "What is 9 x 8?",
     answers: [
-      { text: "Green", correct: false },
-      { text: "Purple", correct: true },
-      { text: "Orange", correct: false },
-      { text: "Brown", correct: false }
+      { text: "64", correct: false },
+      { text: "72", correct: true },
+      { text: "81", correct: false },
+      { text: "88", correct: false }
     ]
   },
   {
-    question: "Which is the longest river in the world?",
+    question: "Which country is shaped like a boot?",
     answers: [
-      { text: "Amazon River", correct: false },
-      { text: "Nile River", correct: true },
-      { text: "Mississippi River", correct: false },
-      { text: "Yangtze River", correct: false }
+      { text: "Spain", correct: false },
+      { text: "Italy", correct: true },
+      { text: "Portugal", correct: false },
+      { text: "Greece", correct: false }
     ]
   },
   {
-    question: "How many days are there in a leap year?",
+    question: "Who wrote 'Romeo and Juliet'?",
+    answers: [
+      { text: "Charles Dickens", correct: false },
+      { text: "William Shakespeare", correct: true },
+      { text: "Jane Austen", correct: false },
+      { text: "Mark Twain", correct: false }
+    ]
+  },
+  {
+    question: "What is the freezing point of water in Celsius?",
+    answers: [
+      { text: "0°C", correct: true },
+      { text: "32°C", correct: false },
+      { text: "100°C", correct: false },
+      { text: "-10°C", correct: false }
+    ]
+  },
+  {
+    question: "Which social media app uses a ghost as its logo?",
+    answers: [
+      { text: "Instagram", correct: false },
+      { text: "Snapchat", correct: true },
+      { text: "Twitter", correct: false },
+      { text: "TikTok", correct: false }
+    ]
+  },
+  {
+    question: "How many days are in a leap year?",
     answers: [
       { text: "365", correct: false },
       { text: "366", correct: true },
@@ -263,75 +362,21 @@ html, body {
     ]
   },
   {
-    question: "Which sport is played at Wimbledon?",
+    question: "What metal is liquid at room temperature?",
     answers: [
-      { text: "Cricket", correct: false },
-      { text: "Football", correct: false },
-      { text: "Tennis", correct: true },
-      { text: "Golf", correct: false }
-    ]
-  },
-  {
-    question: "What is the capital of Nigeria?",
-    answers: [
-      { text: "Lagos", correct: false },
-      { text: "Kano", correct: false },
-      { text: "Abuja", correct: true },
-      { text: "Port Harcourt", correct: false }
-    ]
-  },
-  {
-    question: "Which planet is closest to the Sun?",
-    answers: [
-      { text: "Venus", correct: false },
-      { text: "Earth", correct: false },
+      { text: "Iron", correct: false },
+      { text: "Copper", correct: false },
       { text: "Mercury", correct: true },
-      { text: "Mars", correct: false }
+      { text: "Aluminum", correct: false }
     ]
   },
   {
-    question: "How many sides does a triangle have?",
+    question: "Which continent is the Sahara Desert located in?",
     answers: [
-      { text: "2", correct: false },
-      { text: "3", correct: true },
-      { text: "4", correct: false },
-      { text: "5", correct: false }
-    ]
-  },
-  {
-    question: "Which fruit is yellow and monkeys love it?",
-    answers: [
-      { text: "Apple", correct: false },
-      { text: "Banana", correct: true },
-      { text: "Orange", correct: false },
-      { text: "Grapes", correct: false }
-    ]
-  },
-  {
-    question: "What do we use to measure temperature?",
-    answers: [
-      { text: "Ruler", correct: false },
-      { text: "Thermometer", correct: true },
-      { text: "Scale", correct: false },
-      { text: "Clock", correct: false }
-    ]
-  },
-  {
-    question: "Which is the fastest land animal?",
-    answers: [
-      { text: "Lion", correct: false },
-      { text: "Cheetah", correct: true },
-      { text: "Horse", correct: false },
-      { text: "Leopard", correct: false }
-    ]
-  },
-  {
-    question: "How many wheels does a bicycle have?",
-    answers: [
-      { text: "1", correct: false },
-      { text: "2", correct: true },
-      { text: "3", correct: false },
-      { text: "4", correct: false }
+      { text: "Asia", correct: false },
+      { text: "Africa", correct: true },
+      { text: "Australia", correct: false },
+      { text: "South America", correct: false }
     ]
   }
 ];
