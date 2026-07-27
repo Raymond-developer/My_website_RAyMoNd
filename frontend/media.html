@@ -6,26 +6,29 @@
 <title>Media Vault</title>
 <style>
     * { box-sizing: border-box; margin:0; padding:0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial; background:#f1f1f1; padding:10px; }
-  header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px; }
-  h1 { font-size:22px; }
- .btn { padding:8px 14px; border:none; border-radius:8px; background:#007AFF; color:white; font-weight:600; cursor:pointer; }
- .btn.danger { background:#FF3B30; }
+  body { font-family: Arial; background:#111; color:white; padding:10px; }
+  header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:10px; flex-wrap:wrap; }
+  h1 { font-size:20px; }
+.btn { padding:8px 12px; border:none; border-radius:6px; background:#0A84FF; color:white; font-weight:bold; cursor:pointer; }
+.btn.danger { background:#FF453A; }
+  input[type=file] { color:white; }
 
-  /* RESPONSIVE GRID - 2 per row on phone, 4-6 on PC */
-  #grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:12px; }
-  @media(max-width:500px){ #grid { grid-template-columns: repeat(2, 1fr); } }
+  /* AUTO COLUMNS */
+  #grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:10px; }
+  @media(max-width:600px){ #grid { grid-template-columns: repeat(2, 1fr); } }
 
-.card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.1); }
-.card img,.card video { width:100%; height:140px; object-fit:cover; cursor:pointer; background:#ddd; }
-.card p { font-size:11px; padding:6px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.del { width:100%; background:#FF3B30; color:white; border:none; padding:8px; font-weight:bold; cursor:pointer; }
+.card { background:#1c1c1e; border-radius:10px; overflow:hidden; }
+.thumb { width:100%; height:130px; background:#000; cursor:pointer; position:relative; }
+.thumb img,.thumb video { width:100%; height:100%; object-fit:cover; }
+.play { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:30px; color:white; opacity:0.7; }
+.card p { font-size:10px; padding:5px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.del { width:100%; background:#FF453A; color:white; border:none; padding:7px; cursor:pointer; }
+.loader { text-align:center; grid-column:1/-1; padding:40px; color:#aaa; }
 
-  /* FULLSCREEN VIEWER */
-  #viewer { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:999; justify-content:center; align-items:center; flex-direction:column; }
-  #viewer img, #viewer video { max-width:95%; max-height:85%; border-radius:8px; }
-  #viewer.close { position:absolute; top:20px; right:30px; color:white; font-size:40px; cursor:pointer; font-weight:bold; }
-  #viewer p { color:white; margin-top:10px; }
+  /* FULLSCREEN */
+  #viewer { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:999; justify-content:center; align-items:center; flex-direction:column; }
+  #viewer img, #viewer video { max-width:100%; max-height:90%; }
+  #viewer.close { position:absolute; top:15px; right:20px; font-size:40px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -38,34 +41,30 @@
   </div>
 </header>
 
-<div id="grid"></div>
+<div id="grid"><div class="loader">No media yet</div></div>
 
-<!-- FULLSCREEN POPUP -->
 <div id="viewer">
   <span class="close" onclick="closeViewer()">&times;</span>
   <div id="viewerContent"></div>
-  <p id="viewerName"></p>
 </div>
-
 
 <script>
 const fileInput = document.getElementById('fileInput');
 const grid = document.getElementById('grid');
 const viewer = document.getElementById('viewer');
 const viewerContent = document.getElementById('viewerContent');
-const viewerName = document.getElementById('viewerName');
 
-let mediaFiles = JSON.parse(localStorage.getItem('mediaVaultV2')) || [];
+let mediaFiles = JSON.parse(localStorage.getItem('vaultFiles')) || [];
 renderFiles();
 
-// 1. SAVE WHEN YOU SELECT
-fileInput.addEventListener('change', (e) => {
-  [...e.target.files].forEach(file => {
+// SAVE WHEN YOU SELECT
+fileInput.addEventListener('change', () => {
+  [...fileInput.files].forEach(file => {
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = (e) => {
       mediaFiles.push({
         name: file.name,
-        data: event.target.result,
+        data: e.target.result, // base64 data
         type: file.type
       });
       saveAndRender();
@@ -75,10 +74,10 @@ fileInput.addEventListener('change', (e) => {
   fileInput.value = '';
 });
 
-// 2. RENDER GRID
+// SHOW GRID
 function renderFiles(){
   if(mediaFiles.length === 0){
-    grid.innerHTML = '<p style="text-align:center; grid-column:1/-1; color:gray; padding:40px;">No media yet. Choose files above</p>';
+    grid.innerHTML = '<div class="loader">Tap "Choose Files" to add photos and videos</div>';
     return;
   }
   grid.innerHTML = '';
@@ -86,53 +85,60 @@ function renderFiles(){
     const isVideo = file.type.startsWith('video');
     grid.innerHTML += `
       <div class="card">
-        ${isVideo 
-       ? `<video src="${file.data}" onclick="openViewer(${i})"></video>` 
-          : `<img src="${file.data}" onclick="openViewer(${i})" loading="lazy">`
-        }
-        <p title="${file.name}">${file.name}</p>
+        <div class="thumb" onclick="openViewer(${i})">
+          ${isVideo 
+         ? `<video src="${file.data}" muted></video><div class="play">▶</div>` 
+            : `<img src="${file.data}" loading="lazy">`
+          }
+        </div>
+        <p>${file.name}</p>
         <button class="del" onclick="deleteFile(${i})">Delete</button>
       </div>
     `;
   });
 }
 
-// 3. FULLSCREEN VIEWER
+// FULLSCREEN
 function openViewer(i){
   const file = mediaFiles[i];
-  viewerName.innerText = file.name;
   const isVideo = file.type.startsWith('video');
   viewerContent.innerHTML = isVideo 
-   ? `<video src="${file.data}" controls autoplay></video>`
+ ? `<video src="${file.data}" controls autoplay></video>`
     : `<img src="${file.data}">`;
   viewer.style.display = 'flex';
 }
 function closeViewer(){
   viewer.style.display = 'none';
-  viewerContent.innerHTML = ''; // stop video
+  viewerContent.innerHTML = '';
 }
+viewer.onclick = (e) => { if(e.target === viewer) closeViewer() }
 
-// 4. DELETE + SAVE
+// DELETE WITH CONFIRMATION
 function deleteFile(i){
-  if(confirm("Delete "+mediaFiles[i].name+"?")){
+  const fileName = mediaFiles[i].name;
+  if(confirm(`Are you sure you want to delete "${fileName}"?`)){ // NEW
     mediaFiles.splice(i,1);
     saveAndRender();
   }
 }
+
+// CLEAR ALL WITH CONFIRMATION
 function clearAll(){
-  if(confirm("Delete ALL files?")){
+  if(mediaFiles.length === 0) return;
+  if(confirm(`Delete ALL ${mediaFiles.length} files? This cannot be undone.`)){ // NEW
     mediaFiles = [];
     saveAndRender();
   }
 }
+
 function saveAndRender(){
-  localStorage.setItem('mediaVaultV2', JSON.stringify(mediaFiles));
+  try{
+    localStorage.setItem('vaultFiles', JSON.stringify(mediaFiles));
+  }catch(e){
+    alert("Storage Full! Delete some files. iPhone has 5MB limit.");
+  }
   renderFiles();
 }
-
-// close viewer on tap background
-viewer.addEventListener('click', (e)=>{ if(e.target === viewer) closeViewer() })
 </script>
-
 </body>
 </html>
