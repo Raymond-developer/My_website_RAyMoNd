@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Media Vault 50</title>
+<title>Media Vault GB</title>
 <style>
     * { box-sizing: border-box; margin:0; padding:0; }
   body { font-family: Arial; background:#111; color:white; padding:10px; }
@@ -37,7 +37,7 @@
   </div>
 </header>
 
-<div id="grid"><div class="loader">No media yet</div></div>
+<div id="grid"><div class="loader">Opening Database...</div></div>
 
 <div id="viewer">
   <span class="close" onclick="closeViewer()">&times;</span>
@@ -45,123 +45,120 @@
 </div>
 
 <script>
-const MAX_FILES = 50; // CHANGE THIS IF YOU WANT
+const MAX_FILES = 50;
+const DB_NAME = "MediaVaultDB";
+const STORE_NAME = "files";
+let db;
+
 const fileInput = document.getElementById('fileInput');
 const grid = document.getElementById('grid');
 const viewer = document.getElementById('viewer');
 const viewerContent = document.getElementById('viewerContent');
 const count = document.getElementById('count');
 
-let mediaFiles = JSON.parse(localStorage.getItem('vaultFiles50')) || [];
-renderFiles();
+// 1. OPEN DATABASE
+const request = indexedDB.open(DB_NAME, 1);
+request.onerror = () => alert("Database failed to open");
+request.onsuccess = (e) => { db = e.target.result; renderFiles(); }
+request.onupgradeneeded = (e) => {
+  db = e.target.result;
+  db.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
+}
 
-// SAVE WHEN YOU SELECT
-fileInput.addEventListener('change', () => {
-  if(mediaFiles.length >= MAX_FILES){
-    alert(`Limit reached! You can only save ${MAX_FILES} files. Delete some first.`);
-    return;
-  }
-
-  [...fileInput.files].forEach(file => {
-    if(mediaFiles.length >= MAX_FILES){
-      alert(`Stopped. ${MAX_FILES} file limit reached.`);
+// 2. ADD FILE
+fileInput.addEventListener('change', async () => {
+  const files = [...fileInput.files];
+  const tx = db.transaction(STORE_NAME, "readonly");
+  const store = tx.objectStore(STORE_NAME);
+  const countReq = store.count();
+  
+  countReq.onsuccess = async () => {
+    if(countReq.result + files.length > MAX_FILES){
+      alert(`Limit reached! Max ${MAX_FILES} files.`);
       return;
     }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      // COMPRESS IMAGES to save space
-      if(file.type.startsWith('image')){
-        compressImage(e.target.result, (compressed) => {
-          addFile(file.name, compressed, file.type);
-        });
-      } else {
-        addFile(file.name, e.target.result, file.type); // videos not compressed
-      }
+    for(let file of files){
+      await addFile(file);
     }
-    reader.readAsDataURL(file);
-  });
+    renderFiles();
+  }
   fileInput.value = '';
 });
 
-function addFile(name, data, type){
-  mediaFiles.push({ name, data, type });
-  saveAndRender();
-}
-
-// COMPRESS IMAGE TO FIT MORE
-function compressImage(base64, callback){
-  const img = new Image();
-  img.src = base64;
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    const maxW = 1000; // resize to 1000px wide max
-    const scale = maxW / img.width;
-    canvas.width = maxW;
-    canvas.height = img.height * scale;
-    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-    callback(canvas.toDataURL('image/jpeg', 0.7)); // 70% quality
-  }
-}
-
-// SHOW GRID
-function renderFiles(){
-  count.innerText = `${mediaFiles.length}/${MAX_FILES}`;
-  if(mediaFiles.length === 0){
-    grid.innerHTML = '<div class="loader">Tap "Choose Files" to add up to 50 photos/videos</div>';
-    return;
-  }
-  grid.innerHTML = '';
-  mediaFiles.forEach((file, i) => {
-    const isVideo = file.type.startsWith('video');
-    grid.innerHTML += `
-      <div class="card">
-        <div class="thumb" onclick="openViewer(${i})">
-          ${isVideo
-        ? `<video src="${file.data}" muted></video><div class="play">▶</div>`
-            : `<img src="${file.data}" loading="lazy">`
-          }
-        </div>
-        <p>${file.name}</p>
-        <button class="del" onclick="deleteFile(${i})">Delete</button>
-      </div>
-    `;
+function addFile(file){
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+      store.add({ name: file.name, data: e.target.result, type: file.type });
+      tx.oncomplete = resolve;
+    }
+    reader.readAsDataURL(file);
   });
 }
 
-// FULLSCREEN
-function openViewer(i){
-  const file = mediaFiles[i];
-  const isVideo = file.type.startsWith('video');
-  viewerContent.innerHTML = isVideo
-? `<video src="${file.data}" controls autoplay></video>`
-    : `<img src="${file.data}">`;
-  viewer.style.display = 'flex';
+// 3. RENDER FILES
+function renderFiles(){
+  const tx = db.transaction(STORE_NAME, "readonly");
+  const store = tx.objectStore(STORE_NAME);
+  const req = store.getAll();
+  req.onsuccess = () => {
+    const mediaFiles = req.result;
+    count.innerText = `${mediaFiles.length}/${MAX_FILES}`;
+    if(mediaFiles.length === 0){
+      grid.innerHTML = '<div class="loader">Tap "Choose Files" to add up to 50 photos/videos</div>';
+      return;
+    }
+    grid.innerHTML = '';
+    mediaFiles.forEach((file) => {
+      const isVideo = file.type.startsWith('video');
+      grid.innerHTML += `
+        <div class="card">
+          <div class="thumb" onclick="openViewer(${file.id})">
+            ${isVideo 
+           ? `<video src="${file.data}" muted></video><div class="play">▶</div>` 
+              : `<img src="${file.data}" loading="lazy">`
+            }
+          </div>
+          <p>${file.name}</p>
+          <button class="del" onclick="deleteFile(${file.id})">Delete</button>
+        </div>
+      `;
+    });
+  }
+}
+
+// 4. FULLSCREEN
+function openViewer(id){
+  const tx = db.transaction(STORE_NAME, "readonly");
+  const store = tx.objectStore(STORE_NAME);
+  store.get(id).onsuccess = (e) => {
+    const file = e.target.result;
+    const isVideo = file.type.startsWith('video');
+    viewerContent.innerHTML = isVideo
+   ? `<video src="${file.data}" controls autoplay></video>`
+      : `<img src="${file.data}">`;
+    viewer.style.display = 'flex';
+  }
 }
 function closeViewer(){ viewer.style.display = 'none'; viewerContent.innerHTML = ''; }
 viewer.onclick = (e) => { if(e.target === viewer) closeViewer() }
 
-// DELETE WITH CONFIRMATION
-function deleteFile(i){
-  if(confirm(`Delete "${mediaFiles[i].name}"?`)){
-    mediaFiles.splice(i,1);
-    saveAndRender();
+// 5. DELETE
+function deleteFile(id){
+  if(confirm("Delete this file?")){
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    tx.objectStore(STORE_NAME).delete(id);
+    tx.oncomplete = renderFiles;
   }
 }
 function clearAll(){
-  if(confirm(`Delete ALL ${mediaFiles.length} files?`)){
-    mediaFiles = [];
-    saveAndRender();
+  if(confirm("Delete ALL files?")){
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    tx.objectStore(STORE_NAME).clear();
+    tx.oncomplete = renderFiles;
   }
-}
-function saveAndRender(){
-  try{
-    localStorage.setItem('vaultFiles50', JSON.stringify(mediaFiles));
-  }catch(e){
-    alert("Storage Full! iPhone only gives 5MB. Delete some files or use smaller videos.");
-    mediaFiles.pop(); // remove the last one that failed
-  }
-  renderFiles();
 }
 </script>
 </body>
