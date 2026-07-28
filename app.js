@@ -1,9 +1,9 @@
 import express from 'express'
+import dotenv from 'dotenv'
+dotenv.config()
 import { fileURLToPath } from 'url'
 // Recreate __dirname for ESM
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const app = express()
+
 import mongoose from 'mongoose'
 import user from './model/user.js';
 // import mongodb from './model/schema.js';
@@ -12,139 +12,149 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import path from 'path'
 import bordyparser from 'body-parser'
-import dotenv from 'dotenv'
 import axios from 'axios'
 import multer from 'multer'
 import fs from 'fs'
-dotenv.config()
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import {v2 as cloudinary } from 'cloudinary';
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const app = express()
+
 
 const port = process.env.PORT || 8000
 const JWT_SECRET = process.env.JWT_SECRET
 const url = process.env.MONGO_URL
 
- async function main() {
-  try{
-      await mongoose.connect(url)
-      console.log("atlas connected successfully")
+ 
 
-  }catch(err){
-    console.log('err')
-     console.log(err)
-  }
-} 
-main()
-
-app.use(cors())
+//app.use(cors())
+app.use(cors({ origin: "*",
+  methods: ["GET", "POST" , "DELETE"]
+ }));
 app.use(express.json())
 app.use(bordyparser())
-
  app.use(express.static(path.join(__dirname, 'frontend')))
 
- //start her sdfyuiopiuytrewrtyuiopoiuytretyui
+ //start her sdfyuiopiuytrewrtyuiopoiuytretkjhgf
 
-//app.use('/uploads', express.static('uploads')); // serve files
+// 1. CONFIGURE CLOUDINARY
+cloudinary.config({ 
+  cloud_name: process.env.CLOUD_NAME, 
+  api_key: process.env.CLOUD_API_KEY, 
+  api_secret: process.env.CLOUD_API_SECRET
+});
+console.log("Cloudinary Configured:", process.env.CLOUD_NAME);
 
+// 2. CONFIGURE MULTER + CLOUDINARY STORAGE
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'media_vault',
+    resource_type: 'auto', // allows image, video, pdf
+  },
+});
+const upload = multer({ 
+  storage, 
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit for now
+});
 
-// 2. Media Schema
+// 3. MONGO SCHEMA
 const mediaSchema = new mongoose.Schema({
-    filename: { type: String, required: true }, // saved name on server
-    originalname: { type: String, required: true }, // original name
-    type: { type: String, required: true }, // image/video
-    size: Number,
-    createdAt: { type: Date, default: Date.now }
+  url: String,
+  public_id: String,
+  originalname: String,
+  type: String,
+  size: Number,
+  createdAt: { type: Date, default: Date.now }
 });
 const Media = mongoose.model('Media', mediaSchema);
 
-// 3. Create uploads folder
-if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
+// 4. CONNECT MONGODB
+async function main() {
+  try {
+    await mongoose.connect(url);
+    console.log("atlas connected successfully");
+  } catch(err) {
+    console.log("MONGO ERROR:", err);
+  }
+}
+main();
 
-// 4. Multer config
-const storage = multer.diskStorage({
-    destination: 'uploads/',
-    filename: (req, file, cb) => {
-        const unique = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, unique + path.extname(file.originalname));
-    }
-});
-
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
-        cb(null, true);
-    } else {
-        cb(new Error('Only images and videos allowed'), false);
-    }
-};
-
-const upload = multer({ 
-    storage, 
-    fileFilter,
-    limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
-});
-
-// 5. Routes
-// Upload
+// 5. UPLOAD ROUTE
 app.post('/upload', upload.array('files', 10), async (req, res) => {
-    try {
-        const files = req.files;
-        const docs = files.map(file => ({
-            filename: file.filename,
-            originalname: file.originalname,
-            type: file.mimetype,
-            size: file.size
-        }));
-        await Media.insertMany(docs);
-        res.json({ status: 'ok', count: files.length });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+  console.log("ROUTE HIT");
+  console.log("Files received:", req.files);
+  
+  try {
+    if(!req.files || req.files.length === 0){
+      return res.status(400).json({error: "No files uploaded"});
     }
+    
+    const docs = req.files.map(file => ({
+      url: file.path, // cloudinary url
+      public_id: file.filename,
+      originalname: file.originalname,
+      type: file.mimetype,
+      size: file.size,
+    }));
+    
+    await Media.insertMany(docs);
+    res.json({ status: 'ok', count: req.files.length, files: docs });
+  } catch (err) {
+    console.log("UPLOAD ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Get all files
+// 6. GET FILES ROUTE - to show in gallery
 app.get('/files', async (req, res) => {
-    try {
-        const files = await Media.find().sort({ createdAt: -1 });
-        res.json(files);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const files = await Media.find().sort({ createdAt: -1 });
+    res.json(files);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Delete file
+// ERROR HANDLER - MUST BE LAST
+app.use((err, req, res, next) => {
+  console.log("SERVER ERROR:", err);
+  res.status(500).json({ error: err.message });
+});
+
+
+// DELETE ONE FILE
 app.delete('/delete/:id', async (req, res) => {
-    try {
-        const media = await Media.findById(req.params.id);
-        if (media) {
-            // delete from disk
-            fs.unlink(path.join('uploads', media.filename), (err) => {
-                if (err) console.log("File delete error:", err);
-            });
-            // delete from DB
-            await Media.findByIdAndDelete(req.params.id);
-        }
-        res.json({ status: 'ok' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const file = await Media.findById(req.params.id);
+    if(!file) return res.status(404).json({error: "Not found"});
+    
+    // Delete from cloudinary too
+    await cloudinary.uploader.destroy(file.public_id);
+    await Media.findByIdAndDelete(req.params.id);
+    
+    res.json({status: "ok"});
+  } catch(err) {
+    res.status(500).json({error: err.message});
+  }
 });
 
-// Clear all
+// DELETE ALL FILES
 app.delete('/clear', async (req, res) => {
-    try {
-        const allFiles = await Media.find();
-        allFiles.forEach(file => {
-            fs.unlink(path.join('uploads', file.filename), (err) => {
-                if (err) console.log("File delete error:", err);
-            });
-        });
-        await Media.deleteMany({});
-        res.json({ status: 'ok' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+  try {
+    const files = await Media.find();
+    for(let file of files) {
+      await cloudinary.uploader.destroy(file.public_id);
     }
+    await Media.deleteMany({});
+    res.json({status: "All files cleared"});
+  } catch(err) {
+    res.status(500).json({error: err.message});
+  }
 });
-
-
  //end here kuytrewrtyuiyutrsdfgufdfguigfd
+ 
 
   let token = '';
 
