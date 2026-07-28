@@ -14,6 +14,8 @@ import path from 'path'
 import bordyparser from 'body-parser'
 import dotenv from 'dotenv'
 import axios from 'axios'
+import multer from 'multer'
+import fs from 'fs'
 dotenv.config()
 
 const port = process.env.PORT || 8000
@@ -37,6 +39,112 @@ app.use(express.json())
 app.use(bordyparser())
 
  app.use(express.static(path.join(__dirname, 'frontend')))
+
+ //start her sdfyuiopiuytrewrtyuiopoiuytretyui
+
+app.use('/uploads', express.static('uploads')); // serve files
+
+
+// 2. Media Schema
+const mediaSchema = new mongoose.Schema({
+    filename: { type: String, required: true }, // saved name on server
+    originalname: { type: String, required: true }, // original name
+    type: { type: String, required: true }, // image/video
+    size: Number,
+    createdAt: { type: Date, default: Date.now }
+});
+const Media = mongoose.model('Media', mediaSchema);
+
+// 3. Create uploads folder
+if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
+
+// 4. Multer config
+const storage = multer.diskStorage({
+    destination: 'uploads/',
+    filename: (req, file, cb) => {
+        const unique = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, unique + path.extname(file.originalname));
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only images and videos allowed'), false);
+    }
+};
+
+const upload = multer({ 
+    storage, 
+    fileFilter,
+    limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
+});
+
+// 5. Routes
+// Upload
+app.post('/upload', upload.array('files', 10), async (req, res) => {
+    try {
+        const files = req.files;
+        const docs = files.map(file => ({
+            filename: file.filename,
+            originalname: file.originalname,
+            type: file.mimetype,
+            size: file.size
+        }));
+        await Media.insertMany(docs);
+        res.json({ status: 'ok', count: files.length });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get all files
+app.get('/files', async (req, res) => {
+    try {
+        const files = await Media.find().sort({ createdAt: -1 });
+        res.json(files);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete file
+app.delete('/delete/:id', async (req, res) => {
+    try {
+        const media = await Media.findById(req.params.id);
+        if (media) {
+            // delete from disk
+            fs.unlink(path.join('uploads', media.filename), (err) => {
+                if (err) console.log("File delete error:", err);
+            });
+            // delete from DB
+            await Media.findByIdAndDelete(req.params.id);
+        }
+        res.json({ status: 'ok' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Clear all
+app.delete('/clear', async (req, res) => {
+    try {
+        const allFiles = await Media.find();
+        allFiles.forEach(file => {
+            fs.unlink(path.join('uploads', file.filename), (err) => {
+                if (err) console.log("File delete error:", err);
+            });
+        });
+        await Media.deleteMany({});
+        res.json({ status: 'ok' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+ //end here kuytrewrtyuiyutrsdfgufdfguigfd
 
   let token = '';
 
