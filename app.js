@@ -38,121 +38,97 @@ app.use(bordyparser())
 
  //start her sdfyuiopiuytrewrtyuiopoiuytretkjhgf
 
-// 1. CONFIGURE CLOUDINARY
+
+// CORS
+app.use(cors({ origin: "*", methods: ["GET", "POST", "DELETE"] }));
+
+// CLOUDINARY
 cloudinary.config({ 
   cloud_name: process.env.CLOUD_NAME, 
   api_key: process.env.CLOUD_API_KEY, 
   api_secret: process.env.CLOUD_API_SECRET
 });
-console.log("Cloudinary Configured:", process.env.CLOUD_NAME);
 
-// 2. CONFIGURE MULTER + CLOUDINARY STORAGE
+// MULTER + CLOUDINARY
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'media_vault',
-    resource_type: 'auto', // allows image, video, pdf
-  },
+  cloudinary,
+  params: { folder: 'media_vault', resource_type: 'auto' }
 });
-const upload = multer({ 
-  storage, 
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit for now
-});
+const upload = multer({ storage });
 
-// 3. MONGO SCHEMA
+// MONGO
 const mediaSchema = new mongoose.Schema({
-  url: String,
-  public_id: String,
-  originalname: String,
-  type: String,
+  userId: { type: String, required: true }, // THIS WAS MISSING
+  url: String, 
+  public_id: String, 
+  originalname: String, 
+  type: String, 
   size: Number,
   createdAt: { type: Date, default: Date.now }
 });
 const Media = mongoose.model('Media', mediaSchema);
+mongoose.connect(process.env.MONGO_URL).then(() => console.log("Mongo Atlas Connected"));
 
-// 4. CONNECT MONGODB
-async function main() {
+// 1. UPLOAD - NOW SAVES TO MONGO
+app.post('/upload', upload.array('files', 10), async (req, res) => { 
   try {
-    await mongoose.connect(url);
-    console.log("atlas connected successfully");
-  } catch(err) {
-    console.log("MONGO ERROR:", err);
-  }
-}
-main();
+    const { userId } = req.body; 
+    if(!userId) return res.status(400).json({error: "Missing userId"});
+    if(!req.files || req.files.length === 0) return res.status(400).json({error: "No file uploaded"});
 
-// 5. UPLOAD ROUTE
-app.post('/upload', upload.array('files', 10), async (req, res) => {
-  console.log("ROUTE HIT");
-  console.log("Files received:", req.files);
-  
-  try {
-    if(!req.files || req.files.length === 0){
-      return res.status(400).json({error: "No files uploaded"});
-    }
-    
-    const docs = req.files.map(file => ({
-      url: file.path, // cloudinary url
-      public_id: file.filename,
-      originalname: file.originalname,
-      type: file.mimetype,
-      size: file.size,
+    // THIS WAS MISSING: Save to MongoDB
+    const filesToSave = req.files.map(f => ({
+      userId, // save who owns it
+      url: f.path, 
+      public_id: f.filename, 
+      originalname: f.originalname,
+      type: f.mimetype,
+      size: f.size
     }));
-    
-    await Media.insertMany(docs);
-    res.json({ status: 'ok', count: req.files.length, files: docs });
-  } catch (err) {
+    await Media.insertMany(filesToSave); // SAVE IT
+
+    res.json({ status: 'ok', count: filesToSave.length });
+  } catch (err) { 
     console.log("UPLOAD ERROR:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message }); 
   }
 });
 
-// 6. GET FILES ROUTE - to show in gallery
-app.get('/files', async (req, res) => {
+// 2. GET FILES - NOW FILTERS BY USERID
+app.get('/files/:userId', async (req, res) => {
   try {
-    const files = await Media.find().sort({ createdAt: -1 });
+    const files = await Media.find({ userId: req.params.userId }).sort({ createdAt: -1 }); // FILTER BY USER
     res.json(files);
-  } catch (err) {
+  } catch(err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// ERROR HANDLER - MUST BE LAST
-app.use((err, req, res, next) => {
-  console.log("SERVER ERROR:", err);
-  res.status(500).json({ error: err.message });
-});
-
-
-// DELETE ONE FILE
+// 3. DELETE ONE
 app.delete('/delete/:id', async (req, res) => {
   try {
     const file = await Media.findById(req.params.id);
-    if(!file) return res.status(404).json({error: "Not found"});
-    
-    // Delete from cloudinary too
-    await cloudinary.uploader.destroy(file.public_id);
+    if(file) await cloudinary.uploader.destroy(file.public_id);
     await Media.findByIdAndDelete(req.params.id);
-    
-    res.json({status: "ok"});
+    res.json({status: "Deleted"});
   } catch(err) {
-    res.status(500).json({error: err.message});
+    res.status(500).json({ error: err.message });
   }
 });
 
-// DELETE ALL FILES
-app.delete('/clear', async (req, res) => {
+// 4. CLEAR ALL FOR THIS USER
+app.delete('/clear/:userId', async (req, res) => {
   try {
-    const files = await Media.find();
-    for(let file of files) {
-      await cloudinary.uploader.destroy(file.public_id);
-    }
-    await Media.deleteMany({});
-    res.json({status: "All files cleared"});
+    const files = await Media.find({ userId: req.params.userId });
+    for(let file of files) { await cloudinary.uploader.destroy(file.public_id); }
+    await Media.deleteMany({ userId: req.params.userId });
+    res.json({status: "All cleared"});
   } catch(err) {
-    res.status(500).json({error: err.message});
+    res.status(500).json({ error: err.message });
   }
 });
+
+
  //end here kuytrewrtyuiyutrsdfgufdfguigfd
  
 
