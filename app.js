@@ -42,7 +42,7 @@ app.use(bordyparser())
 
  //start her sdfyuiopiuytrewrtyuiopoiuytretyui
 
-app.use('/uploads', express.static('uploads')); // serve files
+//app.use('/uploads', express.static('uploads')); // serve files
 
 
 // 2. Media Schema
