@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Media Vault</title>
+<title>My Media Vault</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
   body { background: #0f172a; color: #e2e8f0; padding: 15px; }
@@ -11,6 +11,7 @@
   
   header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
   header h1 { font-size: 1.8rem; color: #38bdf8; }
+  .user-id { font-size: 0.7rem; color: #94a3b8; }
   
   .upload-box { 
     background: #1e293b; padding: 20px; border-radius: 12px; 
@@ -40,10 +41,10 @@
   .card {
     background: #1e293b; border-radius: 12px; overflow: hidden;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative;
-    cursor: pointer; /* NEW: clickable */
+    cursor: pointer;
   }
   .card img, .card video { width: 100%; height: 180px; object-fit: cover; display: block; background: #000; }
-  .card-info { padding: 10px; font-size: 0.85rem; pointer-events: none; } /* so click passes through */
+  .card-info { padding: 10px; font-size: 0.85rem; pointer-events: none; }
   .card-info p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .delete-btn {
     position: absolute; top: 8px; right: 8px; z-index: 10;
@@ -52,7 +53,6 @@
     font-weight: bold; font-size: 18px; line-height: 32px;
   }
   
-  /* MODALS */
   .modal { 
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100;
@@ -62,10 +62,7 @@
     max-width: 350px; width: 90%;
   }
 
-  /* NEW: FULLSCREEN VIEWER */
-  #viewerModal {
-    background: rgba(0,0,0,0.95); padding: 0;
-  }
+  #viewerModal { background: rgba(0,0,0,0.95); padding: 0; }
   .viewer-content {
     position: relative; width: 100%; height: 100%; display: flex;
     justify-content: center; align-items: center;
@@ -81,7 +78,6 @@
   .loader { text-align: center; padding: 40px; color: #94a3b8; grid-column: 1 / -1; }
   #uploadStatus { margin-top: 10px; min-height: 20px; }
   
-  /* Mobile Responsive */
   @media (max-width: 768px) {
     header { flex-direction: column; align-items: flex-start; }
     header h1 { font-size: 1.5rem; }
@@ -101,9 +97,12 @@
 <body>
 <div class="container">
   <header>
-    <h1>📂 Media Vault</h1>
+    <div>
+      <h1>📂 My Media Vault</h1>
+      <p class="user-id" id="userIdDisplay"></p>
+    </div>
     <div class="actions">
-      <button class="btn btn-clear" onclick="clearAll()">Clear All</button>
+      <button class="btn btn-clear" onclick="clearAll()">Clear All My Files</button>
     </div>
   </header>
 
@@ -131,27 +130,33 @@
   </div>
 </div>
 
-<!-- NEW: Fullscreen Viewer Modal -->
+<!-- Fullscreen Viewer Modal -->
 <div id="viewerModal" class="modal" onclick="closeViewer()">
   <span class="close-viewer" onclick="closeViewer()">×</span>
-  <div class="viewer-content" id="viewerContent" onclick="event.stopPropagation()">
-    <!-- Image or Video will be injected here -->
-  </div>
+  <div class="viewer-content" id="viewerContent" onclick="event.stopPropagation()"></div>
 </div>
 
 <script>
-  
-const BACKEND_URL = "https://my-website-r-ay-mo-nd.vercel.app";
+const BACKEND_URL = "https://my-website-r-ay-mo-nd.vercel.app"; // <-- IMPORTANT: CHANGE THIS TO YOUR VERCEL BACKEND URL
+
+// 1. CREATE A UNIQUE USER ID FOR THIS DEVICE
+let userId = localStorage.getItem('mediaVaultUserId');
+if(!userId){
+  userId = 'user_' + Math.random().toString(36).substr(2, 9);
+  localStorage.setItem('mediaVaultUserId', userId);
+}
+document.getElementById('userIdDisplay').innerText = `Device ID: ${userId}`; // so you know it's private
+
 const gallery = document.getElementById('gallery');
 const uploadForm = document.getElementById('uploadForm');
 const uploadStatus = document.getElementById('uploadStatus');
 let deleteId = null;
 
-// 1. LOAD ALL FILES
+// 2. LOAD ONLY THIS USER'S FILES
 async function loadFiles() {
   gallery.innerHTML = `<div class="loader">Loading your files...</div>`;
   try {
-    const res = await fetch(`${BACKEND_URL}/files`);
+    const res = await fetch(`${BACKEND_URL}/files/${userId}`);
     if(!res.ok) throw new Error("Backend not running");
     const files = await res.json();
     
@@ -164,7 +169,7 @@ async function loadFiles() {
     files.forEach(file => {
       const isVideo = file.type && file.type.startsWith('video');
       const mediaTag = isVideo 
-        ? `<video src="${file.url}"></video>` // removed controls for gallery view
+        ? `<video src="${file.url}"></video>` 
         : `<img src="${file.url}" alt="${file.originalname}" loading="lazy" />`;
       
       gallery.innerHTML += `
@@ -179,65 +184,71 @@ async function loadFiles() {
       `;
     });
   } catch(err) {
-    gallery.innerHTML = `<div class="loader">❌ Error: Is backend running on port 8000?</div>`;
+    gallery.innerHTML = `<div class="loader"> Upload yor data</div>`;
     console.error("LOAD ERROR:", err);
   }
 }
 
-// 2. FULLSCREEN VIEWER FUNCTIONS - NEW
+// 3. FULLSCREEN VIEWER
 function openViewer(url, type) {
   const viewer = document.getElementById('viewerContent');
   if(type && type.startsWith('video')) {
-    viewer.innerHTML = `<video src="${url}" controls autoplay></video>`;
+    viewer.innerHTML = `<video src="${url}" controls autoplay playsinline></video>`;
   } else {
     viewer.innerHTML = `<img src="${url}" alt="fullscreen" />`;
   }
   document.getElementById('viewerModal').style.display = 'flex';
-  document.body.style.overflow = 'hidden'; // prevent scroll
+  document.body.style.overflow = 'hidden';
 }
-
 function closeViewer() {
   document.getElementById('viewerModal').style.display = 'none';
-  document.getElementById('viewerContent').innerHTML = ""; // stop video
+  document.getElementById('viewerContent').innerHTML = "";
   document.body.style.overflow = 'auto';
 }
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeViewer(); });
 
-// Close viewer on ESC key
-document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape') closeViewer();
-});
-
-// 3. UPLOAD FILES
+// 4. UPLOAD FILES AS BASE64 - VERCEL SAFE
 uploadForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const files = document.getElementById('fileInput').files;
   if(files.length === 0) return alert("Please choose files first");
   
-  uploadStatus.innerText = "Uploading...";
+  uploadStatus.innerText = "Uploading... 0/" + files.length;
   uploadStatus.style.color = "#38bdf8";
-  const formData = new FormData();
-  for(let i = 0; i < files.length; i++) {
-    formData.append('files', files[i]);
+  
+  let uploadedCount = 0;
+  for(let file of files){
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    await new Promise(resolve => reader.onload = resolve);
+    
+    try {
+      await fetch(`${BACKEND_URL}/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          file: reader.result, // base64
+          userId: userId,
+          originalname: file.name,
+          type: file.type,
+          size: file.size
+        })
+      });
+      uploadedCount++;
+      uploadStatus.innerText = `Uploading... ${uploadedCount}/${files.length}`;
+    } catch(err) {
+      console.error("UPLOAD ERROR:", err);
+    }
   }
   
-  try {
-    const res = await fetch(`${BACKEND_URL}/upload`, { method: 'POST', body: formData });
-    const data = await res.json();
-    if(data.error) throw new Error(data.error);
-    
-    uploadStatus.innerText = `✅ ${data.count} file(s) uploaded!`;
-    uploadStatus.style.color = "#4ade80";
-    document.getElementById('fileInput').value = "";
-    loadFiles();
-  } catch(err) {
-    uploadStatus.innerText = "❌ Upload failed. Check backend";
-    uploadStatus.style.color = "#f87171";
-    console.error("UPLOAD ERROR:", err);
-  }
+  uploadStatus.innerText = `✅ ${uploadedCount} file(s) uploaded!`;
+  uploadStatus.style.color = "#4ade80";
+  document.getElementById('fileInput').value = "";
+  loadFiles();
   setTimeout(() => uploadStatus.innerText = "", 4000);
 });
 
-// 4. DELETE ONE FILE - WITH CONFIRM
+// 5. DELETE ONE FILE
 function openModal(id) {
   deleteId = id;
   document.getElementById('confirmModal').style.display = 'flex';
@@ -246,7 +257,6 @@ function closeModal() {
   document.getElementById('confirmModal').style.display = 'none';
   deleteId = null;
 }
-
 document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
   if(!deleteId) return;
   try {
@@ -259,13 +269,13 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async () =
   }
 });
 
-// 5. CLEAR ALL FILES
+// 6. CLEAR ONLY THIS USER'S FILES
 async function clearAll() {
-  if(!confirm("Delete ALL files? This cannot be undone.")) return;
+  if(!confirm("Delete ALL your files? Others won't be affected.")) return;
   try {
     uploadStatus.innerText = "Clearing...";
-    await fetch(`${BACKEND_URL}/clear`, { method: 'DELETE' });
-    uploadStatus.innerText = "✅ All files cleared";
+    await fetch(`${BACKEND_URL}/clear/${userId}`, { method: 'DELETE' });
+    uploadStatus.innerText = "✅ All your files cleared";
     loadFiles();
   } catch(err) {
     alert("Clear failed");
