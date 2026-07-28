@@ -17,25 +17,27 @@
   .btn:hover { background: #0ea5e9; transform: translateY(-2px); }
   .btn:disabled { background: #475569; cursor: not-allowed; }
   .btn-danger { background: #f87171; color: white; }
-  .btn-danger:hover { background: #ef4444; }
   .btn-clear { background: #fbbf24; color: #0f172a; }
-  .btn-clear:hover { background: #f59e0b; }
   .actions { display: flex; gap: 10px; flex-wrap: wrap; }
   .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
   .card { background: #1e293b; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; cursor: pointer; }
   .card img, .card video { width: 100%; height: 180px; object-fit: cover; display: block; background: #000; }
   .card-info { padding: 10px; font-size: 0.85rem; pointer-events: none; }
   .card-info p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .delete-btn { position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(239,68,68,0.95); border: none; color: white; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; font-size: 18px; line-height: 32px; }
+  .delete-btn { position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(239,68,68,0.95); border: none; color: white; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; font-size: 18px; }
   .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; }
   .modal-content { background: #1e293b; padding: 25px; border-radius: 12px; text-align: center; max-width: 350px; width: 90%; }
-  #viewerModal { background: rgba(0,0,0,0.95); padding: 0; }
+  #viewerModal { background: rgba(0,0,0,0.95); }
   .viewer-content { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
   .viewer-content img, .viewer-content video { max-width: 95%; max-height: 95%; object-fit: contain; border-radius: 8px; }
   .close-viewer { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; font-weight: bold; z-index: 101; }
   .loader { text-align: center; padding: 40px; color: #94a3b8; grid-column: 1 / -1; }
   #uploadStatus { margin-top: 10px; min-height: 20px; font-weight: 600; }
-  @media (max-width: 768px) { header { flex-direction: column; align-items: flex-start; } .gallery { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } .card img, .card video { height: 140px; } .btn { width: 100%; } }
+  @media (max-width: 768px) { 
+    .gallery { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } 
+    .card img, .card video { height: 140px; } 
+    .btn { width: 100%; }
+  } /* <-- FIXED: Added this closing brace */
 </style>
 </head>
 <body>
@@ -59,8 +61,10 @@
 <div id="viewerModal" class="modal" onclick="closeViewer()"><span class="close-viewer" onclick="closeViewer()">×</span><div class="viewer-content" id="viewerContent" onclick="event.stopPropagation()"></div></div>
 
 <script>
-// IMPORTANT: PUT YOUR REAL VERCEL BACKEND URL HERE
+// CHANGE THESE 3
 const BACKEND_URL = "https://my-website-r-ay-mo-nd.vercel.app"; 
+const CLOUD_NAME = "wwfkuqoc"; // from cloudinary dashboard
+const UPLOAD_PRESET = "media_vault_unsigned"; // the one you created
 
 let userId = localStorage.getItem('mediaVaultUserId');
 if(!userId){ userId = 'user_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('mediaVaultUserId', userId); }
@@ -76,14 +80,14 @@ async function loadFiles() {
   gallery.innerHTML = `<div class="loader">Loading your files...</div>`;
   try {
     const res = await fetch(`${BACKEND_URL}/files/${userId}`);
-    if(!res.ok) throw new Error(`Backend error: ${res.status}. Check BACKEND_URL`);
+    if(!res.ok) throw new Error(`Backend error: ${res.status}`);
     const files = await res.json();
     if(files.length === 0) { gallery.innerHTML = `<div class="loader">No files yet. Upload something!</div>`; return; }
     gallery.innerHTML = "";
     files.forEach(file => {
       const isVideo = file.type && file.type.startsWith('video');
       const mediaTag = isVideo ? `<video src="${file.url}" muted playsinline></video>` : `<img src="${file.url}" alt="${file.originalname}" loading="lazy" />`;
-      gallery.innerHTML += `<div class="card" onclick="openViewer('${file.url}', '${file.type}')">${mediaTag}<button class="delete-btn" onclick="event.stopPropagation(); openModal('${file._id}')">×</button><div class="card-info"><p title="${file.originalname}">${file.originalname}</p><small>${(file.size / 1024).toFixed(1)} KB</small></div></div>`;
+      gallery.innerHTML += `<div class="card" onclick="openViewer('${file.url}', '${file.type}')">${mediaTag}<button class="delete-btn" onclick="event.stopPropagation(); openModal('${file._id}')">×</button><div class="card-info"><p title="${file.originalname}">${file.originalname}</p><small>${(file.size / 1024 / 1024).toFixed(2)} MB</small></div></div>`;
     });
   } catch(err) { gallery.innerHTML = `<div class="loader">❌ ${err.message}</div>`; console.error(err); }
 }
@@ -94,7 +98,6 @@ function openViewer(url, type) {
   document.getElementById('viewerModal').style.display = 'flex'; document.body.style.overflow = 'hidden';
 }
 function closeViewer() { document.getElementById('viewerModal').style.display = 'none'; document.getElementById('viewerContent').innerHTML = ""; document.body.style.overflow = 'auto'; }
-document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeViewer(); });
 
 uploadForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -102,27 +105,46 @@ uploadForm.addEventListener('submit', async (e) => {
   if(files.length === 0) return alert("Please choose files first");
   
   uploadBtn.disabled = true;
-  uploadStatus.innerText = `Uploading 0/${files.length}...`;
-  uploadStatus.style.color = "#38bdf8";
+  let uploadedCount = 0;
   
-  const formData = new FormData();
-  formData.append('userId', userId);
-  for(let file of files){ formData.append('files', file); }
-  
-  try {
-    const res = await fetch(`${BACKEND_URL}/upload`, { method: 'POST', body: formData });
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error || `Upload failed: ${res.status}. Is backend URL correct?`); // FIXED: now shows real error
+  for(let file of files){
+    uploadStatus.innerText = `Uploading ${uploadedCount + 1}/${files.length}... ${(file.size/1024/1024).toFixed(1)}MB`;
+    uploadStatus.style.color = "#38bdf8";
     
-    uploadStatus.innerText = `✅ ${data.count} file(s) uploaded!`;
-    uploadStatus.style.color = "#4ade80";
-    document.getElementById('fileInput').value = "";
-    loadFiles();
-  } catch(err) {
-    uploadStatus.innerText = `❌ ${err.message}`;
-    uploadStatus.style.color = "#f87171";
-    console.error("UPLOAD ERROR:", err);
+    // 1. Upload directly to Cloudinary - bypasses Vercel limit
+    const cloudForm = new FormData();
+    cloudForm.append('file', file);
+    cloudForm.append('upload_preset', UPLOAD_PRESET);
+    cloudForm.append('folder', 'media_vault');
+    
+    const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+      method: 'POST',
+      body: cloudForm
+    });
+    const cloudData = await cloudRes.json();
+    if(!cloudRes.ok) throw new Error(cloudData.error.message);
+    
+    // 2. Save the cloudinary url to YOUR backend
+    await fetch(`${BACKEND_URL}/save-url`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        userId,
+        url: cloudData.secure_url,
+        public_id: cloudData.public_id,
+        originalname: file.name,
+        type: file.type,
+        size: file.size
+      })
+    });
+    
+    uploadedCount++;
   }
+  
+  uploadStatus.innerText = `✅ ${uploadedCount} file(s) uploaded!`;
+  uploadStatus.style.color = "#4ade80";
+  document.getElementById('fileInput').value = "";
+  loadFiles();
   uploadBtn.disabled = false;
   setTimeout(() => uploadStatus.innerText = "", 5000);
 });

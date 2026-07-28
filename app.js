@@ -76,25 +76,12 @@ const mediaSchema = new mongoose.Schema({
 const Media = mongoose.model('Media', mediaSchema);
 mongoose.connect(process.env.MONGO_URL).then(() => console.log("Mongo Atlas Connected"));
 
-app.post('/upload', upload.array('files', 10), async (req, res) => { 
+app.post('/save-url', async (req, res) => {
   try {
-    const { userId } = req.body; 
-    if(!userId) return res.status(400).json({error: "Missing userId"});
-    if(!req.files || req.files.length === 0) return res.status(400).json({error: "No file uploaded"});
-
-    const filesToSave = req.files.map(f => ({
-      userId,
-      url: f.path, // cloudinary gives different url for video
-      public_id: f.filename, 
-      originalname: f.originalname,
-      type: f.mimetype,
-      size: f.size
-    }));
-    await Media.insertMany(filesToSave);
-    res.json({ status: 'ok', count: filesToSave.length });
-  } catch (err) { 
-    console.log("UPLOAD ERROR:", err);
-    res.status(500).json({ error: err.message }); 
+    await Media.create(req.body); // just saves the url we got from cloudinary
+    res.json({ status: 'ok' });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
