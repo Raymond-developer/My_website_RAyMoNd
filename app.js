@@ -39,54 +39,58 @@ app.use(bordyparser())
  //start her sdfyuiopiuytrewrtyuiopoiuytretkjhgf
 
 
-// CORS
 app.use(cors({ origin: "*", methods: ["GET", "POST", "DELETE"] }));
 
-// CLOUDINARY
 cloudinary.config({ 
   cloud_name: process.env.CLOUD_NAME, 
   api_key: process.env.CLOUD_API_KEY, 
   api_secret: process.env.CLOUD_API_SECRET
 });
 
-// MULTER + CLOUDINARY
+// FIX 1: resource_type: 'auto' allows images + videos
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: { folder: 'media_vault', resource_type: 'auto' }
+  params: async (req, file) => {
+    let resource = 'image';
+    if(file.mimetype.startsWith('video')) resource = 'video'; // auto detect
+    
+    return {
+      folder: 'media_vault',
+      resource_type: resource, // 'image' or 'video'
+      public_id: `${Date.now()}-${file.originalname}`
+    };
+  }
 });
-const upload = multer({ storage });
 
-// MONGO
+// FIX 2: Increase file size limit. Default is 1MB
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 100 * 1024 * 1024 } // 100MB max per file
+});
+
 const mediaSchema = new mongoose.Schema({
-  userId: { type: String, required: true }, // THIS WAS MISSING
-  url: String, 
-  public_id: String, 
-  originalname: String, 
-  type: String, 
-  size: Number,
+  userId: { type: String, required: true },
+  url: String, public_id: String, originalname: String, type: String, size: Number,
   createdAt: { type: Date, default: Date.now }
 });
 const Media = mongoose.model('Media', mediaSchema);
 mongoose.connect(process.env.MONGO_URL).then(() => console.log("Mongo Atlas Connected"));
 
-// 1. UPLOAD - NOW SAVES TO MONGO
 app.post('/upload', upload.array('files', 10), async (req, res) => { 
   try {
     const { userId } = req.body; 
     if(!userId) return res.status(400).json({error: "Missing userId"});
     if(!req.files || req.files.length === 0) return res.status(400).json({error: "No file uploaded"});
 
-    // THIS WAS MISSING: Save to MongoDB
     const filesToSave = req.files.map(f => ({
-      userId, // save who owns it
-      url: f.path, 
+      userId,
+      url: f.path, // cloudinary gives different url for video
       public_id: f.filename, 
       originalname: f.originalname,
       type: f.mimetype,
       size: f.size
     }));
-    await Media.insertMany(filesToSave); // SAVE IT
-
+    await Media.insertMany(filesToSave);
     res.json({ status: 'ok', count: filesToSave.length });
   } catch (err) { 
     console.log("UPLOAD ERROR:", err);
@@ -94,21 +98,19 @@ app.post('/upload', upload.array('files', 10), async (req, res) => {
   }
 });
 
-// 2. GET FILES - NOW FILTERS BY USERID
 app.get('/files/:userId', async (req, res) => {
   try {
-    const files = await Media.find({ userId: req.params.userId }).sort({ createdAt: -1 }); // FILTER BY USER
+    const files = await Media.find({ userId: req.params.userId }).sort({ createdAt: -1 });
     res.json(files);
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// 3. DELETE ONE
 app.delete('/delete/:id', async (req, res) => {
   try {
     const file = await Media.findById(req.params.id);
-    if(file) await cloudinary.uploader.destroy(file.public_id);
+    if(file) await cloudinary.uploader.destroy(file.public_id, {resource_type: file.type.startsWith('video') ? 'video' : 'image'});
     await Media.findByIdAndDelete(req.params.id);
     res.json({status: "Deleted"});
   } catch(err) {
@@ -116,11 +118,12 @@ app.delete('/delete/:id', async (req, res) => {
   }
 });
 
-// 4. CLEAR ALL FOR THIS USER
 app.delete('/clear/:userId', async (req, res) => {
   try {
     const files = await Media.find({ userId: req.params.userId });
-    for(let file of files) { await cloudinary.uploader.destroy(file.public_id); }
+    for(let file of files) { 
+      await cloudinary.uploader.destroy(file.public_id, {resource_type: file.type.startsWith('video') ? 'video' : 'image'}); 
+    }
     await Media.deleteMany({ userId: req.params.userId });
     res.json({status: "All cleared"});
   } catch(err) {
