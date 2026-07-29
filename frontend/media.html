@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+  const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+   </script> 
+  
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Media Vault</title>
 <style>
@@ -13,18 +23,17 @@
   input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #333; border-radius: 8px; background: #2a2a2a; color: var(--text); }
   button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
   button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* 2 COLUMNS ON PHONE */
   #gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   @media(min-width: 768px){ #gallery { grid-template-columns: 1fr 1fr 1fr; } }
 
  .media-card { background: var(--card); border-radius: 10px; overflow: hidden; }
- .media-card img,.media-card video { width: 100%; height: 150px; object-fit: cover; cursor: pointer; display: block; } /* reduced height for 2 cols */
+ .media-card img,.media-card video { width: 100%; height: 150px; object-fit: cover; cursor: pointer; display: block; }
  .media-card button { background: var(--danger); border-radius: 0; padding: 8px; font-size: 13px; }
  .hidden { display: none; }
  .empty { text-align: center; color: #aaa; grid-column: 1/-1; padding: 40px 0; }
 
-  /* FULLSCREEN VIEWER */
   #viewer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 999; padding: 10px; }
   #viewerContent { width: 100%; max-width: 900px; }
   #viewerContent img, #viewerContent video { width: 100%; height: auto; max-height: 80vh; border-radius: 8px; }
@@ -44,8 +53,8 @@
   <div id="appBox" class="hidden">
     <h2>📁 Vault - <span id="userEmail"></span></h2>
     <div class="box">
-      <input type="file" id="fileInput" accept="image/*,video/*" />
-      <button id="uploadBtn">Upload</button>
+      <input type="file" id="fileInput" accept="image/*,video/*" multiple /> <!-- ADDED multiple -->
+      <button id="uploadBtn">Upload Selected</button>
       <button onclick="logout()" style="background:#555;margin-top:8px;">Logout</button>
     </div>
     <div id="gallery"><div class="empty">Loading...</div></div>
@@ -106,36 +115,46 @@ async function loadFromDB() {
 }
 
 document.getElementById('uploadBtn').onclick = async () => {
-  const file = document.getElementById('fileInput').files[0];
-  if (!file) return alert("Pick a file first");
+  const files = document.getElementById('fileInput').files; // get all files
+  if (files.length === 0) return alert("Pick files first");
+  
   const btn = document.getElementById('uploadBtn');
   btn.disabled = true;
-  btn.innerText = "Uploading...";
+  btn.innerText = `Uploading 0/${files.length}...`;
 
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', UPLOAD_PRESET);
+  let uploaded = 0;
+  for(let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
 
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method: 'POST', body: formData });
-  const result = await res.json();
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method: 'POST', body: formData });
+      const result = await res.json();
 
-  if(result.secure_url) {
-    await fetch(`${API_URL}/api/save-media`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        userId: CURRENT_USER,
-        url: result.secure_url,
-        type: result.resource_type,
-        public_id: result.public_id
-      })
-    });
-    document.getElementById('fileInput').value = "";
-    loadFromDB();
-  } else { alert("Upload failed: " + result.error?.message) }
+      if(result.secure_url) {
+        await fetch(`${API_URL}/api/save-media`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            userId: CURRENT_USER,
+            url: result.secure_url,
+            type: result.resource_type,
+            public_id: result.public_id
+          })
+        });
+        uploaded++;
+        btn.innerText = `Uploading ${uploaded}/${files.length}...`;
+      }
+    } catch(err) { console.log("Upload error", err) }
+  }
 
+  document.getElementById('fileInput').value = "";
   btn.disabled = false;
-  btn.innerText = "Upload";
+  btn.innerText = "Upload Selected";
+  alert(`${uploaded} files uploaded!`);
+  loadFromDB();
 }
 
 async function deleteMedia(id) {
