@@ -38,85 +38,67 @@ app.use(bordyparser())
 
  //start her sdfyuiopiuytrewrtyuiopoiuytretkjhgf
 
+// 1. CONNECT MONGODB with Mongoose
+mongoose.connect(url)
+.then(() => console.log("MongoDB Connected"))
+.catch(err => console.log(err));
 
-app.use(cors({ origin: "*", methods: ["GET", "POST", "DELETE"] }));
-
-cloudinary.config({ 
-  cloud_name: process.env.CLOUD_NAME, 
-  api_key: process.env.CLOUD_API_KEY, 
+// 2. CLOUDINARY CONFIG - optional if you upload from frontend
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET
 });
 
-// FIX 1: resource_type: 'auto' allows images + videos
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    let resource = 'image';
-    if(file.mimetype.startsWith('video')) resource = 'video'; // auto detect
-    
-    return {
-      folder: 'media_vault',
-      resource_type: resource, // 'image' or 'video'
-      public_id: `${Date.now()}-${file.originalname}`
-    };
-  }
-});
-
-// FIX 2: Increase file size limit. Default is 1MB
-const upload = multer({ 
-  storage,
-  limits: { fileSize: 100 * 1024 * 1024 } // 100MB max per file
-});
-
+// 3. MONGOOSE SCHEMA
 const mediaSchema = new mongoose.Schema({
-  userId: { type: String, required: true },
-  url: String, public_id: String, originalname: String, type: String, size: Number,
+  userId: { type: String, required: true }, // this is the email
+  url: { type: String, required: true },
+  type: { type: String }, // image or video
+  public_id: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 const Media = mongoose.model('Media', mediaSchema);
-mongoose.connect(process.env.MONGO_URL).then(() => console.log("Mongo Atlas Connected"));
 
-app.post('/save-url', async (req, res) => {
+// 4. ROUTES
+
+// SAVE - after frontend uploads to cloudinary
+app.post('/api/save-media', async (req, res) => {
   try {
-    await Media.create(req.body); // just saves the url we got from cloudinary
-    res.json({ status: 'ok' });
-  } catch(err) {
+    const { userId, url, type, public_id } = req.body;
+    if (!userId || !url) return res.status(400).json({ error: "Missing userId or url" });
+    
+    const newMedia = new Media({ userId, url, type, public_id });
+    await newMedia.save();
+    res.json({ success: true, data: newMedia });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/files/:userId', async (req, res) => {
+// GET - THIS IS WHAT FIXES MULTI-DEVICE
+app.get('/api/get-media', async (req, res) => {
   try {
-    const files = await Media.find({ userId: req.params.userId }).sort({ createdAt: -1 });
-    res.json(files);
-  } catch(err) {
+    const { userId } = req.query;
+    if (!userId) return res.status(400).json({ error: "Missing userId" });
+    
+    const items = await Media.find({ userId }).sort({ createdAt: -1 });
+    res.json(items);
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/delete/:id', async (req, res) => {
+// DELETE
+app.delete('/api/delete-media/:id', async (req, res) => {
   try {
-    const file = await Media.findById(req.params.id);
-    if(file) await cloudinary.uploader.destroy(file.public_id, {resource_type: file.type.startsWith('video') ? 'video' : 'image'});
     await Media.findByIdAndDelete(req.params.id);
-    res.json({status: "Deleted"});
-  } catch(err) {
+    res.json({ success: true });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/clear/:userId', async (req, res) => {
-  try {
-    const files = await Media.find({ userId: req.params.userId });
-    for(let file of files) { 
-      await cloudinary.uploader.destroy(file.public_id, {resource_type: file.type.startsWith('video') ? 'video' : 'image'}); 
-    }
-    await Media.deleteMany({ userId: req.params.userId });
-    res.json({status: "All cleared"});
-  } catch(err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 
  //end here kuytrewrtyuiyutrsdfgufdfguigfd

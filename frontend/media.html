@@ -1,170 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Media Vault</title>
+<title>Media Vault</title>
 <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-  body { background: #0f172a; color: #e2e8f0; padding: 15px; }
-  .container { max-width: 1200px; margin: 0 auto; }
-  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-  header h1 { font-size: 1.8rem; color: #38bdf8; }
-  .user-id { font-size: 0.7rem; color: #94a3b8; }
-  .upload-box { background: #1e293b; padding: 20px; border-radius: 12px; border: 2px dashed #334155; text-align: center; margin-bottom: 20px; }
-  .upload-box input[type="file"] { color: #e2e8f0; margin: 10px 0; width: 100%; max-width: 400px; }
-  .btn { background: #38bdf8; color: #0f172a; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; margin: 5px; transition: 0.2s; font-size: 1rem; }
-  .btn:hover { background: #0ea5e9; transform: translateY(-2px); }
-  .btn:disabled { background: #475569; cursor: not-allowed; }
-  .btn-danger { background: #f87171; color: white; }
-  .btn-clear { background: #fbbf24; color: #0f172a; }
-  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
-  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-  .card { background: #1e293b; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; cursor: pointer; }
-  .card img, .card video { width: 100%; height: 180px; object-fit: cover; display: block; background: #000; }
-  .card-info { padding: 10px; font-size: 0.85rem; pointer-events: none; }
-  .card-info p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .delete-btn { position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(239,68,68,0.95); border: none; color: white; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; font-size: 18px; }
-  .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; }
-  .modal-content { background: #1e293b; padding: 25px; border-radius: 12px; text-align: center; max-width: 350px; width: 90%; }
-  #viewerModal { background: rgba(0,0,0,0.95); }
-  .viewer-content { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-  .viewer-content img, .viewer-content video { max-width: 95%; max-height: 95%; object-fit: contain; border-radius: 8px; }
-  .close-viewer { position: absolute; top: 20px; right: 30px; font-size: 40px; color: white; cursor: pointer; font-weight: bold; z-index: 101; }
-  .loader { text-align: center; padding: 40px; color: #94a3b8; grid-column: 1 / -1; }
-  #uploadStatus { margin-top: 10px; min-height: 20px; font-weight: 600; }
-  @media (max-width: 768px) { 
-    .gallery { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } 
-    .card img, .card video { height: 140px; } 
-    .btn { width: 100%; }
-  } /* <-- FIXED: Added this closing brace */
+  :root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #007bff; --danger: #dc3545; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background: var(--bg); color: var(--text); padding: 12px; }
+.container { max-width: 700px; margin: 0 auto; }
+  h2 { text-align: center; margin-bottom: 15px; font-size: 20px; }
+.box { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+  input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #333; border-radius: 8px; background: #2a2a2a; color: var(--text); }
+  button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
+  button:hover { opacity: 0.85; }
+
+  /* MOBILE FIRST: 1 column on phone, 2 on tablet, 3 on desktop */
+  #gallery { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media(min-width: 480px){ #gallery { grid-template-columns: 1fr 1fr; } }
+  @media(min-width: 768px){ #gallery { grid-template-columns: 1fr 1fr 1fr; } }
+
+.media-card { background: var(--card); border-radius: 10px; overflow: hidden; }
+.media-card img,.media-card video { width: 100%; height: 200px; object-fit: cover; cursor: pointer; display: block; }
+.media-card button { background: var(--danger); border-radius: 0; padding: 10px; font-size: 14px; }
+.hidden { display: none; }
+.empty { text-align: center; color: #aaa; grid-column: 1/-1; padding: 40px 0; }
+
+  /* FULLSCREEN VIEWER */
+  #viewer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 999; padding: 10px; }
+  #viewerContent { width: 100%; max-width: 900px; }
+  #viewerContent img, #viewerContent video { width: 100%; height: auto; max-height: 80vh; border-radius: 8px; }
+  #closeBtn { position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.1); color: white; border: none; font-size: 28px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; } /* BACK BUTTON */
+  #closeBtn:hover { background: rgba(255,255,255,0.2); }
 </style>
 </head>
 <body>
 <div class="container">
-  <header>
-    <div><h1>📂 My Media Vault</h1><p class="user-id" id="userIdDisplay"></p></div>
-    <div class="actions"><button class="btn btn-clear" onclick="clearAll()">Clear All My Files</button></div>
-  </header>
-  <div class="upload-box">
-    <form id="uploadForm">
-      <input type="file" id="fileInput" name="files" multiple accept="image/*,video/*">
-      <br>
-      <button type="submit" class="btn" id="uploadBtn">Upload Selected Files</button>
-    </form>
-    <p id="uploadStatus"></p>
+
+  <div id="loginBox" class="box">
+    <h2>Login to Vault</h2>
+    <input type="text" id="emailInput" placeholder="Enter your email" />
+    <button onclick="login()">Enter</button>
   </div>
-  <div id="gallery" class="gallery"><div class="loader">Loading your files...</div></div>
+
+  <div id="appBox" class="hidden">
+    <h2>📁 Vault - <span id="userEmail"></span></h2>
+    <div class="box">
+      <input type="file" id="fileInput" accept="image/*,video/*" />
+      <button id="uploadBtn">Upload</button>
+      <button onclick="logout()" style="background:#555;margin-top:8px;">Logout</button>
+    </div>
+    <div id="gallery"><div class="empty">Loading...</div></div>
+  </div>
+
 </div>
 
-<div id="confirmModal" class="modal"><div class="modal-content"><h3>Delete this file?</h3><p style="color: #94a3b8; margin: 20px 0;">This cannot be undone.</p><button class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button><button class="btn" onclick="closeModal()">Cancel</button></div></div>
-<div id="viewerModal" class="modal" onclick="closeViewer()"><span class="close-viewer" onclick="closeViewer()">×</span><div class="viewer-content" id="viewerContent" onclick="event.stopPropagation()"></div></div>
+<!-- FULLSCREEN VIEWER WITH BACK BUTTON -->
+<div id="viewer">
+  <button id="closeBtn" onclick="closeViewer()">&larr;</button> <!-- BACK BUTTON -->
+  <div id="viewerContent"></div>
+</div>
 
 <script>
-// CHANGE THESE 3
-const BACKEND_URL = "https://my-website-r-ay-mo-nd.vercel.app"; 
-const CLOUD_NAME = "wwfkuqoc"; // from cloudinary dashboard
-const UPLOAD_PRESET = "media_vault_unsigned"; // the one you created
+const CLOUD_NAME = "wwfkuqoc";
+const UPLOAD_PRESET = "media_vault";
+const API_URL = "https://my-website-r-ay-mo-nd.vercel.app"; // CHANGE WHEN DEPLOYED
 
-let userId = localStorage.getItem('mediaVaultUserId');
-if(!userId){ userId = 'user_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('mediaVaultUserId', userId); }
-document.getElementById('userIdDisplay').innerText = `Device ID: ${userId}`;
+let CURRENT_USER = "";
 
-const gallery = document.getElementById('gallery');
-const uploadForm = document.getElementById('uploadForm');
-const uploadStatus = document.getElementById('uploadStatus');
-const uploadBtn = document.getElementById('uploadBtn');
-let deleteId = null;
+function login() {
+  const email = document.getElementById('emailInput').value.trim();
+  if(!email) return alert("Enter email");
+  CURRENT_USER = email;
+  document.getElementById('userEmail').innerText = email;
+  document.getElementById('loginBox').classList.add('hidden');
+  document.getElementById('appBox').classList.remove('hidden');
+  loadFromDB();
+}
 
-async function loadFiles() {
-  gallery.innerHTML = `<div class="loader">Loading your files...</div>`;
+function logout() {
+  CURRENT_USER = "";
+  document.getElementById('appBox').classList.add('hidden');
+  document.getElementById('loginBox').classList.remove('hidden');
+}
+
+async function loadFromDB() {
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = `<div class="empty">Loading...</div>`;
   try {
-    const res = await fetch(`${BACKEND_URL}/files/${userId}`);
-    if(!res.ok) throw new Error(`Backend error: ${res.status}`);
-    const files = await res.json();
-    if(files.length === 0) { gallery.innerHTML = `<div class="loader">No files yet. Upload something!</div>`; return; }
-    gallery.innerHTML = "";
-    files.forEach(file => {
-      const isVideo = file.type && file.type.startsWith('video');
-      const mediaTag = isVideo ? `<video src="${file.url}" muted playsinline></video>` : `<img src="${file.url}" alt="${file.originalname}" loading="lazy" />`;
-      gallery.innerHTML += `<div class="card" onclick="openViewer('${file.url}', '${file.type}')">${mediaTag}<button class="delete-btn" onclick="event.stopPropagation(); openModal('${file._id}')">×</button><div class="card-info"><p title="${file.originalname}">${file.originalname}</p><small>${(file.size / 1024 / 1024).toFixed(2)} MB</small></div></div>`;
-    });
-  } catch(err) { gallery.innerHTML = `<div class="loader">❌ ${err.message}</div>`; console.error(err); }
+    const res = await fetch(`${API_URL}/api/get-media?userId=${CURRENT_USER}`);
+    const mediaList = await res.json();
+    if(mediaList.length === 0) {
+      gallery.innerHTML = `<div class="empty">No media yet. Upload something!</div>`;
+      return;
+    }
+    gallery.innerHTML = mediaList.map(item => `
+      <div class="media-card">
+        ${item.type === 'video'
+       ? `<video src="${item.url}" onclick="openViewer('${item.url}', 'video')"></video>`
+          : `<img src="${item.url}" onclick="openViewer('${item.url}', 'image')" />`
+        }
+        <button onclick="deleteMedia('${item._id}')">Delete</button>
+      </div>
+    `).join("");
+  } catch(err) {
+    gallery.innerHTML = `<div class="empty">Error loading. Check server.</div>`;
+  }
 }
 
-function openViewer(url, type) {
-  const viewer = document.getElementById('viewerContent');
-  viewer.innerHTML = type && type.startsWith('video') ? `<video src="${url}" controls autoplay playsinline></video>` : `<img src="${url}" alt="fullscreen" />`;
-  document.getElementById('viewerModal').style.display = 'flex'; document.body.style.overflow = 'hidden';
-}
-function closeViewer() { document.getElementById('viewerModal').style.display = 'none'; document.getElementById('viewerContent').innerHTML = ""; document.body.style.overflow = 'auto'; }
+document.getElementById('uploadBtn').onclick = async () => {
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) return alert("Pick a file first");
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true;
+  btn.innerText = "Uploading...";
 
-uploadForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const files = document.getElementById('fileInput').files;
-  if(files.length === 0) return alert("Please choose files first");
-  
-  uploadBtn.disabled = true;
-  let uploadedCount = 0;
-  
-  for(let file of files){
-    uploadStatus.innerText = `Uploading ${uploadedCount + 1}/${files.length}... ${(file.size/1024/1024).toFixed(1)}MB`;
-    uploadStatus.style.color = "#38bdf8";
-    
-    // 1. Upload directly to Cloudinary - bypasses Vercel limit
-    const cloudForm = new FormData();
-    cloudForm.append('file', file);
-    cloudForm.append('upload_preset', UPLOAD_PRESET);
-    cloudForm.append('folder', 'media_vault');
-    
-    const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
-      method: 'POST',
-      body: cloudForm
-    });
-    const cloudData = await cloudRes.json();
-    if(!cloudRes.ok) throw new Error(cloudData.error.message);
-    
-    // 2. Save the cloudinary url to YOUR backend
-    await fetch(`${BACKEND_URL}/save-url`, {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', UPLOAD_PRESET);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method: 'POST', body: formData });
+  const result = await res.json();
+
+  if(result.secure_url) {
+    await fetch(`${API_URL}/api/save-media`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        userId,
-        url: cloudData.secure_url,
-        public_id: cloudData.public_id,
-        originalname: file.name,
-        type: file.type,
-        size: file.size
+        userId: CURRENT_USER,
+        url: result.secure_url,
+        type: result.resource_type,
+        public_id: result.public_id
       })
     });
-    
-    uploadedCount++;
-  }
-  
-  uploadStatus.innerText = `✅ ${uploadedCount} file(s) uploaded!`;
-  uploadStatus.style.color = "#4ade80";
-  document.getElementById('fileInput').value = "";
-  loadFiles();
-  uploadBtn.disabled = false;
-  setTimeout(() => uploadStatus.innerText = "", 5000);
-});
+    document.getElementById('fileInput').value = "";
+    loadFromDB();
+  } else { alert("Upload failed: " + result.error?.message) }
 
-function openModal(id) { deleteId = id; document.getElementById('confirmModal').style.display = 'flex'; }
-function closeModal() { document.getElementById('confirmModal').style.display = 'none'; deleteId = null; }
-document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
-  if(!deleteId) return;
-  await fetch(`${BACKEND_URL}/delete/${deleteId}`, { method: 'DELETE' });
-  closeModal(); loadFiles();
-});
-
-async function clearAll() {
-  if(!confirm("Delete ALL your files?")) return;
-  await fetch(`${BACKEND_URL}/clear/${userId}`, { method: 'DELETE' });
-  uploadStatus.innerText = "✅ All your files cleared"; loadFiles();
-  setTimeout(() => uploadStatus.innerText = "", 3000);
+  btn.disabled = false;
+  btn.innerText = "Upload";
 }
 
-loadFiles();
+async function deleteMedia(id) {
+  if(!confirm("Delete this media?")) return;
+  await fetch(`${API_URL}/api/delete-media/${id}`, {method: 'DELETE'});
+  loadFromDB();
+}
+
+function openViewer(url, type) {
+  const viewer = document.getElementById('viewer');
+  const content = document.getElementById('viewerContent');
+  if(type === 'video') {
+    content.innerHTML = `<video src="${url}" controls autoplay playsinline></video>`;
+  } else {
+    content.innerHTML = `<img src="${url}" />`;
+  }
+  viewer.style.display = 'flex';
+}
+
+function closeViewer() {
+  document.getElementById('viewer').style.display = 'none';
+  document.getElementById('viewerContent').innerHTML = "";
+}
+// Also close if you tap background
+document.getElementById('viewer').addEventListener('click', (e) => {
+  if(e.target.id === 'viewer') closeViewer();
+})
 </script>
 </body>
 </html>
