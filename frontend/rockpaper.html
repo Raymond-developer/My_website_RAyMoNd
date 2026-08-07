@@ -3,10 +3,38 @@
 <head>
   <title>Rock Paper Scissors</title>
   <style>
-    body { font-family: Arial; text-align: center; background: #1e1e2e; color: white; padding: 50px; }
-    button { font-size: 20px; padding: 15px 30px; margin: 10px; border: none; border-radius: 10px; cursor: pointer; }
-    #result { font-size: 24px; margin-top: 20px; }
+    body { 
+      font-family: Arial;
+       text-align: center;
+        background: #1e1e2e;
+         color: white; 
+         padding: 50px; 
+        }
+
+    button { 
+       padding: 15px 30px;
+        margin: 10px;
+         border: none; 
+         border-radius: 10px;
+          cursor: pointer; 
+        }
+
+        .btn{
+           font-size: 28px;
+
+        }
+    #result {
+       font-size: 32px;
+        margin-top: 20px; 
+      }
+
+       #score {
+       font-size: 30px;
+   
+      }
+
     .con{
+      margin-top: 100px;
       display: grid;
       justify-content: center;
       align-items: center;
@@ -17,9 +45,9 @@
   <div class="con">
 
   <h1>Rock Paper Scissors ✊✋✌️</h1>
-  <button onclick="play('rock')">✊ Rock</button>
-  <button onclick="play('paper')">✋ Paper</button>
-  <button onclick="play('scissors')">✌️ Scissors</button>
+  <button class="btn" onclick="play('rock')">✊ Rock</button>
+  <button class="btn" onclick="play('paper')">✋ Paper</button>
+  <button class="btn" onclick="play('scissors')">✌️ Scissors</button>
   
   <div id="result"></div>
   <div id="score"></div>
