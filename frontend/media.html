@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>
- /* const token = localStorage.getItem('token');
-  if (!token) window.location.replace('/login.html'); */
-</script> 
+  <script>
+  const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Not logged in? Kick out immediately
+      window.location.replace('/login.html');
+    }
+   </script> 
+  
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Media Vault</title>
 <style>
-  :root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #007bff; --danger: #dc3545; --success: #28a745; }
+  :root { --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --primary: #007bff; --danger: #dc3545; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
   body { background: var(--bg); color: var(--text); padding: 12px; }
  .container { max-width: 700px; margin: 0 auto; }
@@ -18,25 +24,26 @@
   button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
   button:hover { opacity: 0.85; }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
+
   #gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media(min-width: 768px){ #gallery { grid-template-columns: 1fr 1fr 1fr; } /* FIXED: CLOSED BRACE */
+  @media(min-width: 768px){ #gallery { grid-template-columns: 1fr 1fr 1fr; } }
+
  .media-card { background: var(--card); border-radius: 10px; overflow: hidden; }
  .media-card img,.media-card video { width: 100%; height: 150px; object-fit: cover; cursor: pointer; display: block; }
  .media-card button { background: var(--danger); border-radius: 0; padding: 8px; font-size: 13px; }
  .hidden { display: none; }
  .empty { text-align: center; color: #aaa; grid-column: 1/-1; padding: 40px 0; }
+
   #viewer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 999; padding: 10px; }
   #viewerContent { width: 100%; max-width: 900px; }
   #viewerContent img, #viewerContent video { width: 100%; height: auto; max-height: 80vh; border-radius: 8px; }
   #closeBtn { position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.1); color: white; border: none; font-size: 28px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
- .progress { width: 100%; background: #333; border-radius: 8px; overflow: hidden; margin: 10px 0; display: none; height: 8px; }
- .progress-bar { height: 100%; background: var(--success); width: 0%; transition: width 0.2s; }
- .status { font-size: 13px; color: #aaa; text-align: center; margin-top: 5px; min-height: 18px; }
-}
+  #closeBtn:hover { background: rgba(255,255,255,0.2); }
 </style>
 </head>
 <body>
 <div class="container">
+
   <div id="loginBox" class="box">
     <h2>Login to Vault</h2>
     <input type="text" id="emailInput" placeholder="Enter your email" />
@@ -46,14 +53,13 @@
   <div id="appBox" class="hidden">
     <h2>📁 Vault - <span id="userEmail"></span></h2>
     <div class="box">
-      <input type="file" id="fileInput" accept="image/*,video/*" multiple />
-      <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-      <div class="status" id="statusText"></div>
+      <input type="file" id="fileInput" accept="image/*,video/*" multiple /> <!-- ADDED multiple -->
       <button id="uploadBtn">Upload Selected</button>
       <button onclick="logout()" style="background:#555;margin-top:8px;">Logout</button>
     </div>
     <div id="gallery"><div class="empty">Loading...</div></div>
   </div>
+
 </div>
 
 <div id="viewer">
@@ -63,8 +69,8 @@
 
 <script>
 const CLOUD_NAME = "mvbfx0ef";
-const UPLOAD_PRESET = "media_vault"; // MUST BE UNSIGNED IN CLOUDINARY
-const API_URL = "https://my-website-r-ay-mo-nd.vercel.app";
+const UPLOAD_PRESET = "media_vault";
+const API_URL = "https://my-website-r-ay-mo-nd.vercel.app"; // CHANGE WHEN DEPLOYED
 
 let CURRENT_USER = "";
 
@@ -80,7 +86,6 @@ function login() {
 
 function logout() {
   CURRENT_USER = "";
-  localStorage.removeItem('token');
   document.getElementById('appBox').classList.add('hidden');
   document.getElementById('loginBox').classList.remove('hidden');
 }
@@ -89,69 +94,44 @@ async function loadFromDB() {
   const gallery = document.getElementById('gallery');
   gallery.innerHTML = `<div class="empty">Loading...</div>`;
   try {
-    const res = await fetch(`${API_URL}/api/get-media?userId=${encodeURIComponent(CURRENT_USER)}`);
-    if(!res.ok) throw new Error("Failed to load");
+    const res = await fetch(`${API_URL}/api/get-media?userId=${CURRENT_USER}`);
     const mediaList = await res.json();
-    if(!Array.isArray(mediaList) || mediaList.length === 0) {
+    if(mediaList.length === 0) {
       gallery.innerHTML = `<div class="empty">No media yet. Upload something!</div>`;
       return;
     }
     gallery.innerHTML = mediaList.map(item => `
       <div class="media-card">
         ${item.type === 'video'
-       ? `<video src="${item.url}" preload="metadata" onclick="openViewer('${item.url}', 'video')"></video>`
-          : `<img src="${item.url}" loading="lazy" onclick="openViewer('${item.url}', 'image')" />`
+      ? `<video src="${item.url}" onclick="openViewer('${item.url}', 'video')"></video>`
+          : `<img src="${item.url}" onclick="openViewer('${item.url}', 'image')" />`
         }
         <button onclick="deleteMedia('${item._id}')">Delete</button>
       </div>
     `).join("");
   } catch(err) {
-    console.error(err);
     gallery.innerHTML = `<div class="empty">Error loading. Check server.</div>`;
   }
 }
 
-// FIXED UPLOAD FOR BIG VIDEOS
 document.getElementById('uploadBtn').onclick = async () => {
-  const files = document.getElementById('fileInput').files;
+  const files = document.getElementById('fileInput').files; // get all files
   if (files.length === 0) return alert("Pick files first");
   
   const btn = document.getElementById('uploadBtn');
-  const progressBox = document.querySelector('.progress');
-  const progressBar = document.getElementById('progressBar');
-  const statusText = document.getElementById('statusText');
-  
   btn.disabled = true;
-  progressBox.style.display = 'block';
-  let totalUploaded = 0;
+  btn.innerText = `Uploading 0/${files.length}...`;
 
+  let uploaded = 0;
   for(let i = 0; i < files.length; i++) {
     const file = files[i];
-    statusText.innerText = `Uploading ${i+1}/${files.length}: ${file.name}`;
-    
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', UPLOAD_PRESET);
-    formData.append('folder', `media_vault/${CURRENT_USER}`);
 
     try {
-      // Use XHR for large file progress and to avoid fetch timeout
-      const result = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`);
-        xhr.onload = () => resolve(JSON.parse(xhr.responseText));
-        xhr.onerror = () => reject(new Error("Network Error"));
-        xhr.upload.onprogress = (e) => {
-          if(e.lengthComputable){
-            const fileProgress = (e.loaded / e.total) * 100;
-            const totalProgress = ((totalUploaded + fileProgress/100) / files.length) * 100;
-            progressBar.style.width = totalProgress + '%';
-          }
-        };
-        xhr.send(formData);
-      });
-
-      if(result.error) throw new Error(result.error.message);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method: 'POST', body: formData });
+      const result = await res.json();
 
       if(result.secure_url) {
         await fetch(`${API_URL}/api/save-media`, {
@@ -164,20 +144,16 @@ document.getElementById('uploadBtn').onclick = async () => {
             public_id: result.public_id
           })
         });
-        totalUploaded++;
+        uploaded++;
+        btn.innerText = `Uploading ${uploaded}/${files.length}...`;
       }
-    } catch(err) { 
-      console.error("Upload error", err);
-      alert(`Failed: ${file.name}\nReason: ${err.message}\n\n1. Check Cloudinary preset 'media_vault' is UNSIGNED\n2. Check Max File Size is 2GB`);
-    }
+    } catch(err) { console.log("Upload error", err) }
   }
 
   document.getElementById('fileInput').value = "";
   btn.disabled = false;
-  progressBox.style.display = 'none';
-  progressBar.style.width = '0%';
-  statusText.innerText = "";
-  alert(`${totalUploaded} of ${files.length} files uploaded!`);
+  btn.innerText = "Upload Selected";
+  alert(`${uploaded} files uploaded!`);
   loadFromDB();
 }
 
