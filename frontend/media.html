@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <script>
-  const token = localStorage.getItem('token');
+ const token = localStorage.getItem('token');
     if (!token) {
       window.location.replace('/login.html');
-    }
+    } 
    </script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,18 +64,18 @@
   <div id="viewerContent"></div>
 </div>
 
-   <script>
-const CLOUD_NAME = "mvbfkqof";
+<script>
+const CLOUD_NAME = "aevzkk4q"; // MATCHES YOUR CLOUDINARY DASHBOARD
 const UPLOAD_PRESET = "media_vault";
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB = Cloudinary default
-const API_URL = "https://my-website-r-ay-mo-nd.vercel.app";
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB Cloudinary free limit
+const API_URL = "http://localhost:8000";
 
 let CURRENT_USER = "";
 
 function checkFileSize(file) {
   if (file.size > MAX_FILE_SIZE) {
     const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-    alert(`File too large! 😅\n\n"${file.name}"\nSize: ${sizeMB} MB\nMax allowed: 100 MB\n\nPlease compress the video or upgrade Cloudinary limit.`);
+    alert(`File too large! 😅\n\n"${file.name}"\nSize: ${sizeMB} MB\nMax allowed: 100 MB\n\nCompress the video or upgrade Cloudinary.`);
     return false;
   }
   return true;
@@ -101,22 +101,23 @@ async function loadFromDB() {
   const gallery = document.getElementById('gallery');
   gallery.innerHTML = `<div class="empty">Loading...</div>`;
   try {
-    const res = await fetch(`${API_URL}/api/get-media?userId=${CURRENT_USER}`);
+    const res = await fetch(`${API_URL}/api/get-media?userId=${encodeURIComponent(CURRENT_USER)}`);
     const mediaList = await res.json();
-    if(mediaList.length === 0) {
+    if(!Array.isArray(mediaList) || mediaList.length === 0) {
       gallery.innerHTML = `<div class="empty">No media yet. Upload something!</div>`;
       return;
     }
     gallery.innerHTML = mediaList.map(item => `
       <div class="media-card">
         ${item.type === 'video'
-    ? `<video src="${item.url}" onclick="openViewer('${item.url}', 'video')"></video>`
+   ? `<video src="${item.url}" onclick="openViewer('${item.url}', 'video')"></video>`
           : `<img src="${item.url}" onclick="openViewer('${item.url}', 'image')" />`
         }
         <button onclick="deleteMedia('${item._id}')">Delete</button>
       </div>
     `).join("");
   } catch(err) {
+    console.error(err);
     gallery.innerHTML = `<div class="empty">Error loading. Check server.</div>`;
   }
 }
@@ -125,7 +126,7 @@ document.getElementById('uploadBtn').onclick = async () => {
   const files = document.getElementById('fileInput').files;
   if (files.length === 0) return alert("Pick files first");
 
-  // Check all files first
+  // Check all files before starting upload
   for(let i = 0; i < files.length; i++) {
     if (!checkFileSize(files[i])) return;
   }
@@ -145,7 +146,7 @@ document.getElementById('uploadBtn').onclick = async () => {
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method: 'POST', body: formData });
       const result = await res.json();
 
-      if(result.secure_url) {
+      if(res.ok && result.secure_url) {
         await fetch(`${API_URL}/api/save-media`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -159,16 +160,13 @@ document.getElementById('uploadBtn').onclick = async () => {
         uploaded++;
         btn.innerText = `Uploading ${uploaded}/${files.length}...`;
       } else {
-        // Cloudinary error - probably 100MB limit
-        if(result.error?.message?.includes('exceeds')) {
-          alert(`"${file.name}" is too large for Cloudinary free plan.\nMax: 100MB`);
-        } else {
-          alert(`Upload failed for ${file.name}: ${result.error?.message || 'Unknown error'}`);
-        }
+        // Handle Cloudinary errors cleanly
+        const errMsg = result.error?.message || 'Upload failed';
+        alert(`"${file.name}" failed:\n${errMsg}`);
       }
     } catch(err) {
-      console.log("Upload error", err);
-      alert(`Error uploading ${file.name}`);
+      console.error("Upload error", err);
+      alert(`Network error uploading ${file.name}`);
     }
   }
 
@@ -206,6 +204,5 @@ document.getElementById('viewer').addEventListener('click', (e) => {
   if(e.target.id === 'viewer') closeViewer();
 })
 </script>
-
 </body>
 </html>
