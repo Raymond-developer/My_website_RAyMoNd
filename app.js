@@ -11,7 +11,7 @@ import cors from 'cors'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import path from 'path'
-import bordyparser from 'body-parser'
+//import bordyparser from 'body-parser'
 import axios from 'axios'
 import multer from 'multer'
 import fs from 'fs'
@@ -19,6 +19,7 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import {v2 as cloudinary } from 'cloudinary';
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+import { put, del } from '@vercel/blob'; // <-- NEW
 const app = express()
 
 
@@ -33,9 +34,10 @@ app.use(cors({ origin: "*",
   methods: ["GET", "POST" , "DELETE"]
  }));
 
-app.use(cors());
+app.use(cors({ origin: "*" }));
+//app.use(bodyParser.json({ limit: '10mb' })); // for metadata
+//app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 app.use(express.json({ limit: '10mb' })); // increase limit for big metadata
-app.use(bordyparser())
  app.use(express.static(path.join(__dirname, 'frontend')))
 
  //start her sdfyuiopiuytrewrtyuiopoiuytretkjhgf
@@ -297,6 +299,95 @@ const password = await bcrypt.hash(passwords, 10)
    res.json({status: 'ok'})
   })
 
+  // start here iuytrertyuiopiuytrtyuytrtyuiuytrtyuiuytfyuiuyt
+
+
+// MULTER - use memory storage for Vercel Blob
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 1024 * 1024 * 1024 } // 1GB limit
+});
+
+
+// MONGOOSE SCHEMA
+const mediaSchemal = new mongoose.Schema({
+  email: { type: String, required: true }, // this is the user
+  url: { type: String, required: true }, // blob public url
+  blobPath: { type: String, required: true }, // needed to delete
+  type: { type: String, required: true }, // image or video
+  filename: { type: String },
+  size: { type: Number },
+  createdAt: { type: Date, default: Date.now }
+});
+const Medial = mongoose.model('savedIM', mediaSchemal);
+
+
+// 1. UPLOAD ROUTE - TO VERCEL BLOB
+app.post('/get/api/upload-blob', upload.single('file'), async (req, res) => {
+  try {
+    const { userId } = req.body; // userId = email from frontend
+    const file = req.file;
+    if (!file) return res.status(400).json({ error: "No file uploaded" });
+
+    // Upload to Vercel Blob
+    const blob = await put(`vault/${userId}/${Date.now()}-${file.originalname}`, file.buffer, {
+      access: 'public',
+      contentType: file.mimetype,
+    });
+
+    const fileType = file.mimetype.startsWith('video') ? 'video' : 'image';
+
+    // Save to MongoDB
+    const newMedia = new Medial({
+      email: userId,
+      url: blob.url,
+      blobPath: blob.pathname,
+      type: fileType,
+      filename: file.originalname,
+      size: file.size
+    });
+    await newMedia.save();
+
+    res.json({ success: true, url: blob.url, id: newMedia._id });
+
+  } catch(err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// 2. GET MEDIA FOR USER
+app.get('/get/api/get-media', async (req, res) => {
+  try {
+    const { userId } = req.query; // email
+    const mediaList = await Medial.find({ email: userId }).sort({ createdAt: -1 });
+    res.json(mediaList);
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// 3. DELETE MEDIA
+app.delete('/get/api/delete-blob/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { blobPath } = req.body;
+
+    // Delete from Vercel Blob
+    if(blobPath) await del(blobPath);
+    // Delete from MongoDB
+    await Medial.findByIdAndDelete(id);
+
+    res.json({ success: true });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+  //end here tretyuiouytryuiouytrtyuiouytryuiuytfgiu
   
 
   app.listen(port, console.log('server is running on port 8000')
